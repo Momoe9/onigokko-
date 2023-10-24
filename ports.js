@@ -13,7 +13,7 @@ const token = new SkyWayAuthToken({
   exp: nowInSec() + 60 * 60 * 24,
   scope: {
     app: {
-      id: '406a06f7-8985-4c02-af5e-76b07283ceff',
+	id: '489b7100-9ce2-4b50-ac74-1b143ef84667',
       turn: true,
       actions: ['read'],
       channels: [
@@ -49,11 +49,46 @@ const token = new SkyWayAuthToken({
       ],
     },
   },
-}).encode('gXWlQZfhIKh3RjsD0b4PEur/aCc99HNRfGhDG7lNI+A=');
+}).encode('cwBzLkd/0a1vrqUzIegWO5Q09NAajW4CPF7qCCABJ/E=');
 
 
 
 (async () => {
+    function onResults(results) {
+	canvasCtx.save();
+	canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+	canvasCtx.drawImage(
+	    results.image, 0, 0, canvasElement.width, canvasElement.height);
+	if (results.multiHandLandmarks) {
+	    if (results.multiHandLandmarks.length == 2) {
+		marks = results.multiHandLandmarks[0].concat(results.multiHandLandmarks[1]);
+		app.ports.handsReceiver.send(marks);
+		results.multiHandLandmarks.forEach(marks => {
+		    for (const landmarks of results.multiHandLandmarks) {
+			drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
+				       {color: '#00FF00', lineWidth: 5});
+			drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 2});
+		    }
+		});
+	    }
+	}
+	canvasCtx.restore();
+    }
+    const videoElement = document.getElementsByClassName('input_video')[0];
+    const canvasElement = document.getElementsByClassName('output_canvas')[0];
+    const canvasCtx = canvasElement.getContext('2d');
+
+    const hands = new Hands({locateFile: (file) => {
+	return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+    }});
+    hands.setOptions({
+	maxNumHands: 2,
+	modelComplexity: 1,
+	minDetectionConfidence: 0.5,
+	minTrackingConfidence: 0.5
+    });
+    hands.onResults(onResults);
+
 
     const data = await SkyWayStreamFactory.createDataStream();
     console.log(app.ports);
@@ -61,16 +96,34 @@ const token = new SkyWayAuthToken({
 	//console.log(p)
 	data.write({class:"move",player:p});
     });
+    app.ports.loggedIn.subscribe(function(p) {
+	console.log(p)
+	data.write({class:"login",player:p});
+    });
+
+    app.ports.wallsCompleted.subscribe(function(wallinfo){
+	data.write({class:"move",player:wallinfo.host});
+	data.write({class:"wall",walls:wallinfo.walls});
+    });
+    
+				       
     app.ports.join.subscribe(async (room) => {
 	console.log(room)
 	if (room === '') return;
-
+	const camera = new Camera(videoElement, {
+	    onFrame: async () => {
+		await hands.send({image: videoElement});
+	    },
+	    width: 600,
+	    height: 400
+	});
+	camera.start();
 	const context = await SkyWayContext.Create(token);
 	const channel = await SkyWayRoom.FindOrCreate(context, {
 	    type: 'p2p',
 	    name: room
 	});
-	if (channel.members.length >= 4) {
+	if (channel.members.length >= 10) {
 	    return;
 	}
 	const me = await channel.join();
@@ -83,10 +136,17 @@ const token = new SkyWayAuthToken({
             const { stream } = await me.subscribe(publication.id);
 
             stream.onData.add((newdata) => {
+		console.log(newdata);
 		if (newdata.class == "move"){
 		    app.ports.othersMove.send(newdata.player);
 		}
-		else if (newdata.class == "kingyo"){
+		else if (newdata.class == "wall"){
+		    app.ports.wallInfo.send(newdata.walls);
+		}
+		else if (newdata.class == "login"){
+		    console.log("other has loginned");
+		    console.log(newdata.player);
+		    app.ports.othersLogin.send(newdata.player);
 		}
             })
 	};

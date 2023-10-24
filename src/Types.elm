@@ -1,45 +1,71 @@
 module Types exposing (..)
 
+import Dict exposing (Dict)
+import Duration exposing (Duration)
 import Time
 
-type Msg = RoomChanged String
-         | NameChanged String
-         | Recv Player
-         | Join
-         | IdDefined {id:String, num:Int}
-         | Down (Float, Float)
-         | Move (Float, Float)
-         | Up (Float, Float)
-         | KingyoGenerated (List Kingyo)
-         | KingyoMoved (List Kingyo)
-         | KingyoCaught {kingyos:(List Kingyo), points:Int, id:String}
-         | Tick Time.Posix
+type WorldCoordinates = WorldCoordinates
 
-type alias Player = {name: String
+type alias Player = {id: Maybe String
+                    ,name: String
                     ,x: Float
                     ,y: Float
-                    ,id: String
-                    ,points: Int
+                    ,theta: Float
+                    ,oni: Bool
                     }
-type alias Model =
-  { room : String
-  , name : String
-  , moving : Bool
-  , id : Maybe String
-  , host : Bool
-  , x : Float
-  , y : Float
-  , points : Int
-  , players : List Player
-  , kingyos : List Kingyo
-  }
+    
+type alias Model = {me: Player
+                   ,others: List Player
+                   ,room: String
+                   ,name: String
+                   ,host: Bool
+                   ,mazeData: MazeModel
+                   ,state : State
+                   ,angle : Float
+                   ,start : Maybe {x:Float, y:Float}
+                   ,hands : List {x:Float, y:Float, z:Float}
+                   ,prevHands : List {x:Float, y:Float, z:Float}
+                   ,onHomePosition : Bool
+                   ,elapsed: Int
+                   }
 
-type alias Vec2D = {x: Int
-                    ,y: Int
-                    }
-type alias Kingyo = {pos: Vec2D
-                    ,v: Vec2D
-                    ,level: Int
-                    }
+type Msg = OthersLoggedIn Player
+         | OthersMoved Player
+         | IdDefined {id:String, num:Int}
+         | RoomChanged String
+         | NameChanged String
+         | Join
+         | RandomPlayerGenerated Player
+         | KeyDown Int
+         | Hands (List {x:Float, y:Float, z:Float})
+         | NextGen MazeDirection
+         | WallBuilt (List {x:Int, y:Int, dir:Int})
+         | SendWall (List {x:Int, y:Int, dir:Int}) Time.Posix
+         | LocateHands Duration
+--         | Elapsed Duration
+           
+type Direction = Left
+               | Right
+               | Other
+               | Forward
+               | Backward
 
-type alias Ami = {pos : Vec2D}
+type alias Maze = Dict (Int, Int) (Int, Int)
+       
+type alias MazeModel = {maze: Maze
+                       ,outOfTree: (List (Int, Int))
+                       ,currentPos: (Int, Int)
+                       ,lerwStart: (Int, Int)
+                       --,dual: Dict (Int, Int) (List MazeDirection)
+                       ,dual: List {x:Int, y:Int, dir:Int}
+                       }
+
+type MazeDirection = North
+                   | South
+                   | East
+                   | West
+
+type State = Waiting
+           | MovingFront
+           | MovingLeft
+           | MovingTop

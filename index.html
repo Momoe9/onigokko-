@@ -4,11 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <title>Onigokko</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@skyway-sdk/room/dist/skyway_room-latest.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@skyway-sdk/room/dist/skyway_room-latest.js"></script>
 </head>
 
 <body>
   <div id="myapp"></div>
+  <div class="container">
+    <video class="input_video" width="0" height="0"></video>
+    <canvas class="output_canvas" width="800" height="400"></canvas>
+  </div>
   <script type="text/javascript" src="onigokko.js"></script>
   <script src="ports.js"></script>
 </body>
