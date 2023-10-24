@@ -14870,6 +14870,106 @@ var $ianmackenzie$elm_3d_scene$Scene3d$sunny = function (_arguments) {
 };
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $avh4$elm_color$Color$lightOrange = A4($avh4$elm_color$Color$RgbaSpace, 252 / 255, 175 / 255, 62 / 255, 1.0);
+var $author$project$Onigokko$thiefView = function (player) {
+	var materialWhite = $ianmackenzie$elm_3d_scene$Scene3d$Material$nonmetal(
+		{baseColor: $avh4$elm_color$Color$white, roughness: 0.4});
+	var materialBlack = $ianmackenzie$elm_3d_scene$Scene3d$Material$nonmetal(
+		{baseColor: $avh4$elm_color$Color$black, roughness: 0.4});
+	var material = $ianmackenzie$elm_3d_scene$Scene3d$Material$nonmetal(
+		{baseColor: $avh4$elm_color$Color$lightOrange, roughness: 0.4});
+	var face = A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$cylinder,
+		materialBlack,
+		A2(
+			$ianmackenzie$elm_geometry$Cylinder3d$along,
+			A2(
+				$ianmackenzie$elm_geometry$Axis3d$through,
+				A3($ianmackenzie$elm_geometry$Point3d$meters, player.x, player.y, 0),
+				$ianmackenzie$elm_geometry$Direction3d$z),
+			{
+				end: $ianmackenzie$elm_units$Length$meters(1.2),
+				radius: $ianmackenzie$elm_units$Length$meters(0.5),
+				start: $ianmackenzie$elm_units$Length$meters(0.6)
+			}));
+	var eyeHight = 1.0;
+	var lb = A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$sphere,
+		materialBlack,
+		A2(
+			$ianmackenzie$elm_geometry$Sphere3d$atPoint,
+			A3(
+				$ianmackenzie$elm_geometry$Point3d$meters,
+				player.x + (0.37 * $elm$core$Basics$cos(player.theta - ($elm$core$Basics$pi / 9))),
+				player.y + (0.37 * $elm$core$Basics$sin(player.theta - ($elm$core$Basics$pi / 9))),
+				eyeHight),
+			$ianmackenzie$elm_units$Length$meters(0.185)));
+	var left = A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$sphere,
+		materialWhite,
+		A2(
+			$ianmackenzie$elm_geometry$Sphere3d$atPoint,
+			A3(
+				$ianmackenzie$elm_geometry$Point3d$meters,
+				player.x + (0.29 * $elm$core$Basics$cos(player.theta + ((-$elm$core$Basics$pi) / 9))),
+				player.y + (0.29 * $elm$core$Basics$sin(player.theta + ((-$elm$core$Basics$pi) / 9))),
+				eyeHight),
+			$ianmackenzie$elm_units$Length$meters(0.25)));
+	var rb = A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$sphere,
+		materialBlack,
+		A2(
+			$ianmackenzie$elm_geometry$Sphere3d$atPoint,
+			A3(
+				$ianmackenzie$elm_geometry$Point3d$meters,
+				player.x + (0.37 * $elm$core$Basics$cos(player.theta + ($elm$core$Basics$pi / 9))),
+				player.y + (0.37 * $elm$core$Basics$sin(player.theta + ($elm$core$Basics$pi / 9))),
+				eyeHight),
+			$ianmackenzie$elm_units$Length$meters(0.185)));
+	var right = A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$sphere,
+		materialWhite,
+		A2(
+			$ianmackenzie$elm_geometry$Sphere3d$atPoint,
+			A3(
+				$ianmackenzie$elm_geometry$Point3d$meters,
+				player.x + (0.29 * $elm$core$Basics$cos(player.theta + ($elm$core$Basics$pi / 9))),
+				player.y + (0.29 * $elm$core$Basics$sin(player.theta + ($elm$core$Basics$pi / 9))),
+				eyeHight),
+			$ianmackenzie$elm_units$Length$meters(0.25)));
+	var cyl = A2(
+		$elm$core$List$map,
+		function (i) {
+			return A2(
+				$ianmackenzie$elm_3d_scene$Scene3d$cylinder,
+				(!A2($elm$core$Basics$modBy, 2, i)) ? materialWhite : materialBlack,
+				A2(
+					$ianmackenzie$elm_geometry$Cylinder3d$along,
+					A2(
+						$ianmackenzie$elm_geometry$Axis3d$through,
+						A3($ianmackenzie$elm_geometry$Point3d$meters, player.x, player.y, 0),
+						$ianmackenzie$elm_geometry$Direction3d$z),
+					{
+						end: $ianmackenzie$elm_units$Length$meters(0.1 * (i + 1)),
+						radius: $ianmackenzie$elm_units$Length$meters(0.5),
+						start: $ianmackenzie$elm_units$Length$meters(0.1 * i)
+					}));
+		},
+		A2($elm$core$List$range, 0, 5));
+	var cap = A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$sphere,
+		materialBlack,
+		A2(
+			$ianmackenzie$elm_geometry$Sphere3d$atPoint,
+			A3($ianmackenzie$elm_geometry$Point3d$meters, player.x, player.y, 1.2),
+			$ianmackenzie$elm_units$Length$meters(0.5)));
+	var robot = $ianmackenzie$elm_3d_scene$Scene3d$group(
+		_Utils_ap(
+			cyl,
+			_List_fromArray(
+				[left, right, lb, rb, face, cap])));
+	return robot;
+};
 var $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor = function (a) {
 	return {$: 'BackgroundColor', a: a};
 };
@@ -14999,7 +15099,7 @@ var $author$project$Onigokko$view = function (model) {
 			} else {
 				var id = _v0.a;
 				var walls = $author$project$Onigokko$wallView(model.mazeData);
-				var robot = $author$project$Onigokko$playerView(
+				var robot = $author$project$Onigokko$thiefView(
 					A6(
 						$author$project$Types$Player,
 						$elm$core$Maybe$Just(''),

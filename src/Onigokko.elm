@@ -592,7 +592,7 @@ view model =
                           )
                           (Length.meters 0.22)
 
-                 robot = playerView (Player (Just "") "test" 1.5 1.5 0 False)
+                 robot = thiefView (Player (Just "") "test" 1.5 1.5 0 False)
                  walls = wallView model.mazeData
          
                  -- Define a camera as usual
@@ -711,7 +711,94 @@ playerView player =
     in
         robot
         
-        
+thiefView: Player -> Scene3d.Entity coordinates
+thiefView player =
+    let
+        material =
+            Material.nonmetal
+                { baseColor = Color.lightOrange
+                , roughness = 0.4 -- varies from 0 (mirror-like) to 1 (matte)
+                }
+        materialWhite =
+            Material.nonmetal
+                { baseColor = Color.white
+                , roughness = 0.4 -- varies from 0 (mirror-like) to 1 (matte)
+                }
+        materialBlack =
+            Material.nonmetal
+                { baseColor = Color.black
+                , roughness = 0.4 -- varies from 0 (mirror-like) to 1 (matte)
+                }
+        eyeHight = 1.0
+                
+        cyl = List.map (\i -> 
+                        Scene3d.cylinder (if (modBy 2 i)==0 then 
+                                            materialWhite
+                                        else 
+                                            materialBlack)
+                        <| Cylinder3d.along
+                        (Axis3d.through (Point3d.meters player.x player.y 0) Direction3d.z)
+                        { start = Length.meters (0.1*(toFloat i))
+                        , end = Length.meters (0.1*(toFloat (i+1)))
+                        , radius = Length.meters 0.5
+                        })
+                        <| List.range 0 5
+
+
+        face =  Scene3d.cylinder  
+                        materialBlack
+                        <| Cylinder3d.along
+                        (Axis3d.through (Point3d.meters player.x player.y 0) Direction3d.z)
+                        { start = Length.meters 0.6
+                        , end = Length.meters 1.2
+                        , radius = Length.meters 0.5
+                        }
+                  
+        left = Scene3d.sphere materialWhite
+               <| Sphere3d.atPoint
+                   (Point3d.meters
+                        (player.x + 0.29*(cos (player.theta+(-pi/9))))
+                        (player.y + 0.29*(sin (player.theta+(-pi/9))))
+                        eyeHight
+                   )
+                   (Length.meters 0.25)
+        right = Scene3d.sphere materialWhite
+                <| Sphere3d.atPoint
+                    (Point3d.meters
+                         (player.x + 0.29*(cos (player.theta+(pi/9))))
+                         (player.y + 0.29*(sin (player.theta+(pi/9))))
+                         eyeHight
+                    )
+                    (Length.meters 0.25)
+        lb = Scene3d.sphere materialBlack
+             <| Sphere3d.atPoint
+                 (Point3d.meters
+                      (player.x + 0.37*(cos (player.theta-(pi/9))))
+                      (player.y + 0.37*(sin (player.theta-(pi/9))))
+                      eyeHight
+                 )
+                 (Length.meters 0.185)
+        rb = Scene3d.sphere materialBlack
+             <| Sphere3d.atPoint
+                 (Point3d.meters
+                      (player.x + 0.37*(cos (player.theta+(pi/9))))
+                      (player.y + 0.37*(sin (player.theta+(pi/9))))
+                      eyeHight
+                 )
+                 (Length.meters 0.185)
+
+        cap = Scene3d.sphere materialBlack
+            <| Sphere3d.atPoint
+                (Point3d.meters
+                    player.x 
+                    player.y 
+                    1.2)
+                    (Length.meters 0.5)
+
+        robot = Scene3d.group (cyl ++[left,right,lb,rb, face, cap])
+    in
+        robot
+       
 --keyDecoder : D.Decoder Msg
 --keyDecoder =
 --  D.map toDirection (D.field "key" D.string)
