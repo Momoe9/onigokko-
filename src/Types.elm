@@ -7,6 +7,7 @@ import Time
 type WorldCoordinates = WorldCoordinates
 
 type alias Player = {id: Maybe String
+                    ,num: Int
                     ,name: String
                     ,x: Float
                     ,y: Float
@@ -27,6 +28,8 @@ type alias Model = {me: Player
                    ,prevHands : List {x:Float, y:Float, z:Float}
                    ,onHomePosition : Bool
                    ,elapsed: Int
+                   ,started: Bool
+                   ,timeLeft: Int
                    }
 
 type Msg = OthersLoggedIn Player
@@ -42,7 +45,9 @@ type Msg = OthersLoggedIn Player
          | WallBuilt (List {x:Int, y:Int, dir:Int})
          | SendWall (List {x:Int, y:Int, dir:Int}) Time.Posix
          | LocateHands Duration
---         | Elapsed Duration
+         | StartGame
+         | GameStarted String
+         | Elapsed Time.Posix
            
 type Direction = Left
                | Right

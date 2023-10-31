@@ -93,12 +93,15 @@ const token = new SkyWayAuthToken({
     const data = await SkyWayStreamFactory.createDataStream();
     console.log(app.ports);
     app.ports.moved.subscribe(function(p) {
-	//console.log(p)
 	data.write({class:"move",player:p});
     });
     app.ports.loggedIn.subscribe(function(p) {
 	console.log(p)
 	data.write({class:"login",player:p});
+    });
+    app.ports.startGame.subscribe(function(p) {
+	console.log(p)
+	data.write({class:"start"});
     });
 
     app.ports.wallsCompleted.subscribe(function(wallinfo){
@@ -147,6 +150,10 @@ const token = new SkyWayAuthToken({
 		    console.log("other has loginned");
 		    console.log(newdata.player);
 		    app.ports.othersLogin.send(newdata.player);
+		}
+		else if (newdata.class == "start"){
+		    console.log("game started");
+		    app.ports.gameStarted.send(Date.now().toString());
 		}
             })
 	};
