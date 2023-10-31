@@ -348,7 +348,7 @@ dual primal =
                               )
                      dirs)
                 )[] <|
-                Dict.foldl (\k v dict -> remove k v dict) initialEdges primal
+                Dict.foldl (\k v dict -> remove k v dict) (remove (0, mazeSize+1) (1, mazeSize+1) initialEdges) primal
 
                     
 nextDir: (Int, Int) -> Int -> Random.Generator MazeDirection
@@ -696,7 +696,7 @@ view model =
                         , clipDepth = Length.centimeters 0.5
                         , dimensions = ( Pixels.int 1200, Pixels.int 1000 )
                         , background = Scene3d.transparentBackground
-                        , entities = [plane]++[robot]++walls++jail++(List.map playerView model.others)
+                        , entities = [plane]++[robot]++walls++jail++goalView++(List.map playerView model.others)
                         , shadows = True
                         , upDirection = Direction3d.z
                         , sunlightDirection = Direction3d.xz (Angle.degrees -60)
@@ -713,6 +713,41 @@ startButton =
                 ,onClick StartGame]
              [text "start"]
         ]
+
+goalView: List (Scene3d.Entity coordinates)
+goalView = 
+    let
+        material = Material.nonmetal
+                    { baseColor = Color.red
+                    , roughness = 0.4 -- varies from 0 (mirror-like) to 1 (matte)
+                    }
+            
+        pole1 = Scene3d.cylinder material
+             <| Cylinder3d.along
+                (Axis3d.through (Point3d.meters (toFloat(3*(mazeSize+1))) 0  0) Direction3d.z)
+                { start = Length.meters 0 
+                , end = Length.meters 3
+                , radius = Length.meters 0.2
+                }
+
+        pole2 = Scene3d.cylinder material
+             <| Cylinder3d.along
+                (Axis3d.through (Point3d.meters (toFloat(3*(mazeSize+1))) 3  0) Direction3d.z)
+                { start = Length.meters 0 
+                , end = Length.meters 3
+                , radius = Length.meters 0.2
+                }
+        bar  = Scene3d.cylinder material
+             <| Cylinder3d.along
+                (Axis3d.through (Point3d.meters (toFloat(3*(mazeSize+1))) 0  3) Direction3d.y)
+                { start = Length.meters 0 
+                , end = Length.meters 3
+                , radius = Length.meters 0.2
+                }
+
+    in
+        [pole1, pole2, bar]
+    
 
 playerView: Player -> Scene3d.Entity coordinates
 playerView player =

@@ -8429,7 +8429,11 @@ var $author$project$Onigokko$dual = function (primal) {
 				function (k, v, dict) {
 					return A3(remove, k, v, dict);
 				}),
-			initialEdges,
+			A3(
+				remove,
+				_Utils_Tuple2(0, $author$project$Onigokko$mazeSize + 1),
+				_Utils_Tuple2(1, $author$project$Onigokko$mazeSize + 1),
+				initialEdges),
 			primal));
 };
 var $author$project$Types$Left = {$: 'Left'};
@@ -12170,24 +12174,10 @@ var $ianmackenzie$elm_units$Angle$degrees = function (numDegrees) {
 	return $ianmackenzie$elm_units$Angle$radians($elm$core$Basics$pi * (numDegrees / 180));
 };
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $avh4$elm_color$Color$gray = A4($avh4$elm_color$Color$RgbaSpace, 211 / 255, 215 / 255, 207 / 255, 1.0);
-var $avh4$elm_color$Color$green = A4($avh4$elm_color$Color$RgbaSpace, 115 / 255, 210 / 255, 22 / 255, 1.0);
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $author$project$Onigokko$ifIsEnter = function (msg) {
-	return A2(
-		$elm$json$Json$Decode$andThen,
-		function (key) {
-			return (key === 'Enter') ? $elm$json$Json$Decode$succeed(msg) : $elm$json$Json$Decode$fail('some other key');
-		},
-		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
-};
-var $elm$html$Html$input = _VirtualDom_node('input');
-var $ianmackenzie$elm_units$Pixels$int = function (numPixels) {
-	return $ianmackenzie$elm_units$Quantity$Quantity(numPixels);
-};
-var $ianmackenzie$elm_3d_scene$Scene3d$cylinderWithShadow = F2(
-	function (givenMaterial, givenCylinder) {
-		return A4($ianmackenzie$elm_3d_scene$Scene3d$Entity$cylinder, true, true, givenMaterial, givenCylinder);
+var $ianmackenzie$elm_geometry$Point3d$meters = F3(
+	function (x, y, z) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: x, y: y, z: z});
 	});
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$Constant = function (a) {
 	return {$: 'Constant', a: a};
@@ -12246,18 +12236,87 @@ var $ianmackenzie$elm_3d_scene$Scene3d$Material$pbr = function (_v0) {
 			A3($elm$core$Basics$clamp, 0, 1, metallic)),
 		$ianmackenzie$elm_3d_scene$Scene3d$Types$Constant($ianmackenzie$elm_3d_scene$Scene3d$Types$VerticalNormal));
 };
+var $ianmackenzie$elm_3d_scene$Scene3d$Material$nonmetal = function (_v0) {
+	var baseColor = _v0.baseColor;
+	var roughness = _v0.roughness;
+	return $ianmackenzie$elm_3d_scene$Scene3d$Material$pbr(
+		{baseColor: baseColor, metallic: 0, roughness: roughness});
+};
+var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
+var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
+var $author$project$Onigokko$goalView = function () {
+	var material = $ianmackenzie$elm_3d_scene$Scene3d$Material$nonmetal(
+		{baseColor: $avh4$elm_color$Color$red, roughness: 0.4});
+	var pole1 = A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$cylinder,
+		material,
+		A2(
+			$ianmackenzie$elm_geometry$Cylinder3d$along,
+			A2(
+				$ianmackenzie$elm_geometry$Axis3d$through,
+				A3($ianmackenzie$elm_geometry$Point3d$meters, 3 * ($author$project$Onigokko$mazeSize + 1), 0, 0),
+				$ianmackenzie$elm_geometry$Direction3d$z),
+			{
+				end: $ianmackenzie$elm_units$Length$meters(3),
+				radius: $ianmackenzie$elm_units$Length$meters(0.2),
+				start: $ianmackenzie$elm_units$Length$meters(0)
+			}));
+	var pole2 = A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$cylinder,
+		material,
+		A2(
+			$ianmackenzie$elm_geometry$Cylinder3d$along,
+			A2(
+				$ianmackenzie$elm_geometry$Axis3d$through,
+				A3($ianmackenzie$elm_geometry$Point3d$meters, 3 * ($author$project$Onigokko$mazeSize + 1), 3, 0),
+				$ianmackenzie$elm_geometry$Direction3d$z),
+			{
+				end: $ianmackenzie$elm_units$Length$meters(3),
+				radius: $ianmackenzie$elm_units$Length$meters(0.2),
+				start: $ianmackenzie$elm_units$Length$meters(0)
+			}));
+	var bar = A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$cylinder,
+		material,
+		A2(
+			$ianmackenzie$elm_geometry$Cylinder3d$along,
+			A2(
+				$ianmackenzie$elm_geometry$Axis3d$through,
+				A3($ianmackenzie$elm_geometry$Point3d$meters, 3 * ($author$project$Onigokko$mazeSize + 1), 0, 3),
+				$ianmackenzie$elm_geometry$Direction3d$y),
+			{
+				end: $ianmackenzie$elm_units$Length$meters(3),
+				radius: $ianmackenzie$elm_units$Length$meters(0.2),
+				start: $ianmackenzie$elm_units$Length$meters(0)
+			}));
+	return _List_fromArray(
+		[pole1, pole2, bar]);
+}();
+var $avh4$elm_color$Color$gray = A4($avh4$elm_color$Color$RgbaSpace, 211 / 255, 215 / 255, 207 / 255, 1.0);
+var $avh4$elm_color$Color$green = A4($avh4$elm_color$Color$RgbaSpace, 115 / 255, 210 / 255, 22 / 255, 1.0);
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $author$project$Onigokko$ifIsEnter = function (msg) {
+	return A2(
+		$elm$json$Json$Decode$andThen,
+		function (key) {
+			return (key === 'Enter') ? $elm$json$Json$Decode$succeed(msg) : $elm$json$Json$Decode$fail('some other key');
+		},
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+};
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $ianmackenzie$elm_units$Pixels$int = function (numPixels) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numPixels);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$cylinderWithShadow = F2(
+	function (givenMaterial, givenCylinder) {
+		return A4($ianmackenzie$elm_3d_scene$Scene3d$Entity$cylinder, true, true, givenMaterial, givenCylinder);
+	});
 var $ianmackenzie$elm_3d_scene$Scene3d$Material$metal = function (_v0) {
 	var baseColor = _v0.baseColor;
 	var roughness = _v0.roughness;
 	return $ianmackenzie$elm_3d_scene$Scene3d$Material$pbr(
 		{baseColor: baseColor, metallic: 1, roughness: roughness});
 };
-var $ianmackenzie$elm_geometry$Point3d$meters = F3(
-	function (x, y, z) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: x, y: y, z: z});
-	});
-var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
 var $author$project$Onigokko$jailView = function (timeLeft) {
 	var wallHeight = 0.7;
 	var materialGray = $ianmackenzie$elm_3d_scene$Scene3d$Material$metal(
@@ -12427,12 +12486,6 @@ var $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt = function (_arguments) {
 					{originPoint: _arguments.eyePoint, xDirection: arbitraryXDirection, yDirection: _arguments.upDirection, zDirection: arbitraryZDirection}));
 		}
 	}
-};
-var $ianmackenzie$elm_3d_scene$Scene3d$Material$nonmetal = function (_v0) {
-	var baseColor = _v0.baseColor;
-	var roughness = _v0.roughness;
-	return $ianmackenzie$elm_3d_scene$Scene3d$Material$pbr(
-		{baseColor: baseColor, metallic: 0, roughness: roughness});
 };
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -15380,7 +15433,9 @@ var $author$project$Onigokko$view = function (model) {
 											walls,
 											_Utils_ap(
 												jail,
-												A2($elm$core$List$map, $author$project$Onigokko$playerView, model.others))))),
+												_Utils_ap(
+													$author$project$Onigokko$goalView,
+													A2($elm$core$List$map, $author$project$Onigokko$playerView, model.others)))))),
 								shadows: true,
 								sunlightDirection: $ianmackenzie$elm_geometry$Direction3d$xz(
 									$ianmackenzie$elm_units$Angle$degrees(-60)),
