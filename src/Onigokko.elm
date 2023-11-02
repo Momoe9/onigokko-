@@ -210,7 +210,7 @@ update msg model =
             if List.member model.me players then
                 let
                     p = model.me
-                    newMe = {p|x = toFloat (3*(mazeSize+3)+10)
+                    newMe = {p|x = toFloat (3*mazeSize+10)
                             ,y= 10
                             }
                 in
@@ -805,7 +805,7 @@ view model =
                         , clipDepth = Length.centimeters 0.5
                         , dimensions = ( Pixels.int 1200, Pixels.int 1000 )
                         , background = Scene3d.transparentBackground
-                        , entities = [plane]++[robot]++walls++grate++goalView++jailView++(List.map playerView model.others)
+                        , entities = [plane]++walls++grate++goalView++jailView++(List.map playerView model.others)
                         , shadows = True
                         , upDirection = Direction3d.z
                         , sunlightDirection = Direction3d.xz (Angle.degrees -60)

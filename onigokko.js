@@ -9452,7 +9452,7 @@ var $author$project$Onigokko$update = F2(
 					var p = model.me;
 					var newMe = _Utils_update(
 						p,
-						{x: (3 * ($author$project$Onigokko$mazeSize + 3)) + 10, y: 10});
+						{x: (3 * $author$project$Onigokko$mazeSize) + 10, y: 10});
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -15722,17 +15722,14 @@ var $author$project$Onigokko$view = function (model) {
 											_List_fromArray(
 												[plane]),
 											_Utils_ap(
-												_List_fromArray(
-													[robot]),
+												walls,
 												_Utils_ap(
-													walls,
+													grate,
 													_Utils_ap(
-														grate,
+														$author$project$Onigokko$goalView,
 														_Utils_ap(
-															$author$project$Onigokko$goalView,
-															_Utils_ap(
-																$author$project$Onigokko$jailView,
-																A2($elm$core$List$map, $author$project$Onigokko$playerView, model.others))))))),
+															$author$project$Onigokko$jailView,
+															A2($elm$core$List$map, $author$project$Onigokko$playerView, model.others)))))),
 										shadows: true,
 										sunlightDirection: $ianmackenzie$elm_geometry$Direction3d$xz(
 											$ianmackenzie$elm_units$Angle$degrees(-60)),
