@@ -43,8 +43,9 @@ main = Browser.element {init = init
 port join : String -> Cmd msg
 port loggedIn : Player  ->  Cmd msg
 port startGame : Bool  ->  Cmd msg
-port moved : Player  ->  Cmd msg
 port wallsCompleted : {host:Player, walls:List {x:Int, y:Int, dir:Int}}   ->  Cmd msg
+port moved : Player  ->  Cmd msg
+port caught : List Player  ->  Cmd msg
 
 -- receive
 port skywayId : ({id:String, num:Int} -> msg) -> Sub msg
@@ -53,6 +54,7 @@ port gameStarted : (String -> msg) -> Sub msg
 port othersMove : (Player -> msg) -> Sub msg
 port wallInfo: (List {x:Int, y:Int, dir:Int} -> msg) -> Sub msg
 port handsReceiver : (List {x:Float, y:Float, z:Float} -> msg) -> Sub msg
+port toGoJail : (List Player -> msg) -> Sub msg
        
     
 
@@ -101,6 +103,19 @@ randomPlayer =
         (Random.float -10 10) 
         (Random.float 0 (2*pi)) 
 
+initPosition: Player -> Player
+initPosition player = {player|
+                       x = (toFloat (-mazeSize*3))+4.5-(toFloat (3*(modBy 2 player.num)))
+                      --x = (toFloat (mazeSize*3))+4.5-(toFloat (3*(modBy 2 player.num)))+10
+                      , y = if player.oni then
+                                (toFloat ((-mazeSize*3) + (3*((player.num-1) // 2))))+1.5
+                            else
+                                -((toFloat ((-mazeSize*3) + (3*((player.num-1) // 2))))+1.5)
+                      --, y = 10
+                      , theta = 0
+                      }
+
+            
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
@@ -130,13 +145,13 @@ update msg model =
                 setId: Player -> String -> Int -> Player
                 setId player id num = {player|id = Just id
                                       , num = num
-                                      , oni = ((modBy 2 num)/= 1)
-                                      , x = (toFloat ((-mazeSize*3) + (3*(num // 2))))+1.5
-                                      , y = (toFloat (-mazeSize*3))+1.5+(toFloat (3*(modBy 2 num)))
-                                      ,theta = 0
+                                      , oni = ((modBy 2 num)== 1)
+                                      --, x = (toFloat (-mazeSize*3))+4.5-(toFloat (3*(modBy 2 num)))
+                                      --, y = (toFloat ((-mazeSize*3) + (3*((num-1) // 2))))+1.5
+                                      --,theta = 0
                                       }
             in
-                ({model | me = setId model.me info.id info.num
+                ({model | me = initPosition <| setId model.me info.id info.num
                  ,host = Debug.log "host?" <| (info.num == 1)
                  }
                 , if info.num == 1 then
@@ -145,25 +160,11 @@ update msg model =
                       loggedIn model.me
                 )
         StartGame ->
-            let
-                initPosition: Player -> Player
-                initPosition player = {player|
-                                       x = (toFloat ((-mazeSize*3) + (3*(player.num // 2))))+1.5
-                                      , y = (toFloat (-mazeSize*3))+1.5+(toFloat (3*(modBy 2 player.num)))
-                                      , theta = 0
-                                      }
-            in
             ({model|started = True, timeLeft = 30, me = initPosition model.me}
             , startGame True)
         GameStarted str ->
             let
                 dummy = Debug.log "" "Game Started"
-                initPosition: Player -> Player
-                initPosition player = {player|
-                                       x = (toFloat ((-mazeSize*3) + (3*(player.num // 2))))+1.5
-                                      , y = (toFloat (-mazeSize*3))+1.5+(toFloat (3*(modBy 2 player.num)))
-                                      , theta = 0
-                                      }
             in
                 ({model|started=True, timeLeft = 30, me = initPosition model.me}, Cmd.none)
         KeyDown keycode ->
@@ -185,10 +186,14 @@ update msg model =
                              , moved newMe)
                     38 ->
                         let
-                            newMe = moveForward model
+                            newMe = (moveForward model).newMe
+                            newlyCaught = (moveForward model).caught
                         in
                             ({model| me = newMe}
-                            , moved newMe)
+                            , Cmd.batch [ moved newMe
+                                        , caught newlyCaught
+                                        ]
+                            )
                     40 ->
                         let
                             newMe = moveBackward model.me
@@ -201,6 +206,19 @@ update msg model =
                 players = other::(List.filter (\player -> player.id /= other.id) model.others)
             in
                 ({model|others=players}, Cmd.none)
+        GoToJail players ->
+            if List.member model.me players then
+                let
+                    p = model.me
+                    newMe = {p|x = toFloat (3*(mazeSize+3)+10)
+                            ,y= 10
+                            }
+                in
+                    ({model|me=newMe}
+                    , moved newMe
+                    )
+            else
+                (model, Cmd.none)
         OthersLoggedIn other ->
             let
                 players = Debug.log "others logined" <| other::(List.filter (\player -> player.id /= other.id) model.others)
@@ -288,7 +306,15 @@ dual primal =
                               
         initialEdges : Dict (Int, Int) (List MazeDirection)
         initialEdges =
-            List.foldl (\v dict -> Dict.insert v (edges v) dict ) (Dict.empty) dualV
+            Dict.insert (mazeSize+3,2) [North] <|
+            Dict.insert (mazeSize+3,3) [North] <|
+            Dict.insert (mazeSize+3,4) [East] <|
+            Dict.insert (mazeSize+4,4) [East] <|
+            Dict.insert (mazeSize+5,4) [South] <|
+            Dict.insert (mazeSize+5,3) [South] <|
+            Dict.insert (mazeSize+5,2) [West] <|
+            Dict.insert (mazeSize+4,2) [West] <|
+            (List.foldl (\v dict -> Dict.insert v (edges v) dict ) (Dict.empty) dualV)
                 
         remove: (Int, Int) -> (Int, Int) -> Dict (Int,Int) (List MazeDirection) -> Dict (Int,Int) (List MazeDirection)
         remove (fromX, fromY) (toX, toY) dict =
@@ -348,7 +374,7 @@ dual primal =
                               )
                      dirs)
                 )[] <|
-                Dict.foldl (\k v dict -> remove k v dict) (remove (0, mazeSize+1) (1, mazeSize+1) initialEdges) primal
+                Dict.foldl (\k v dict -> remove k v dict) (remove (mazeSize, 0) (mazeSize+1, 0) initialEdges) primal
 
                     
 nextDir: (Int, Int) -> Int -> Random.Generator MazeDirection
@@ -435,7 +461,7 @@ turnLeft p = {p|theta=p.theta+(3*pi/180)}
 turnRight: Player -> Player
 turnRight p = {p|theta=p.theta-(3*pi/180)}          
 
-moveForward: Model -> Player
+moveForward: Model -> {newMe:Player, caught:List Player}
 moveForward model =
     let
         wallWidth = 0.1
@@ -475,8 +501,16 @@ moveForward model =
                    Basics.min (p.y + 0.15*(sin p.theta)) northBorder
                else
                    Basics.max (p.y + 0.15*(sin p.theta)) southBorder
+        dist player1 player2 =
+            sqrt (((player1.x-player2.x)^2) + ((player1.y-player2.y)^2))
+        newlyCaught = if model.me.oni && model.started then
+                     List.filter (\player -> (not player.oni)
+                                 && (dist model.me player) < 1
+                                 ) model.others
+                 else
+                     []
     in
-        {p| x = newX, y = newY}
+        {newMe = {p| x = newX, y = newY}, caught=newlyCaught}
 
 moveBackward: Player -> Player
 moveBackward p =
@@ -523,8 +557,39 @@ wallView mazemodel =
     in
         List.map wallEntity mazemodel.dual
 
-jailView: Int ->  List (Scene3d.Entity coordinates)
-jailView timeLeft =
+
+jailView: List (Scene3d.Entity coordinates)
+jailView =
+    let
+        materialGray = Material.metal
+                       { baseColor = Color.gray
+                       , roughness = 0.0 -- varies from 0 (mirror-like) to 1 (matte)
+                       }
+        jailHeight=3
+        pole: Int -> Int -> Scene3d.Entity coordinates
+        pole x y =
+            Scene3d.cylinderWithShadow materialGray
+                <| Cylinder3d.along
+                    (Axis3d.through (Point3d.meters
+                                         ((toFloat ((mazeSize+3)*3))+0.5*(toFloat (x)))
+                                         (6+0.5*(toFloat (y)))
+                                         0
+                                    )
+                         Direction3d.z
+                    )
+                    { start = Length.meters 0
+                    , end = Length.meters jailHeight
+                    , radius = Length.meters 0.05
+                    }
+    in
+        (List.map (\y -> pole y 0) (List.range 0 12))
+        ++(List.map (\y -> pole y 12) (List.range 0 12))
+        ++(List.map (\x -> pole 0 x) (List.range 0 12))
+        ++(List.map (\x -> pole 12 x) (List.range 0 12))
+    
+            
+grateView: Int ->  List (Scene3d.Entity coordinates)
+grateView timeLeft =
     let
         materialGray =
             Material.metal
@@ -532,12 +597,12 @@ jailView timeLeft =
                 , roughness = 0.0 -- varies from 0 (mirror-like) to 1 (matte)
                 }
         wallHeight=0.7
-        jailHeight=Debug.log "jail height" <| 2*(toFloat timeLeft)/30
+        jailHeight=2*(toFloat timeLeft)/30
         jailEntity: Int -> Scene3d.Entity coordinates
         jailEntity i =
             Scene3d.cylinderWithShadow materialGray
                 <| Cylinder3d.along
-                    (Axis3d.through (Point3d.meters (-12) (-15+0.5*(toFloat (i)))  0) Direction3d.z)
+                    (Axis3d.through (Point3d.meters (-(((toFloat mazeSize)-1)*3)) (-15+0.5*(toFloat (i)))  0) Direction3d.z)
                          { start = Length.meters 0
                          , end = Length.meters jailHeight
                          , radius = Length.meters 0.1
@@ -663,7 +728,7 @@ view model =
 
                  robot = thiefView (Player (Just "") 0 "test" 1.5 1.5 0 False)
                  walls = wallView model.mazeData
-                 jail = jailView model.timeLeft
+                 grate = grateView model.timeLeft
 
                  camera =
                      let
@@ -676,7 +741,7 @@ view model =
                              { viewpoint =
                                    Viewpoint3d.lookAt
                                    { focalPoint = (Point3d.meters fx fy 1.0)
-                                   , eyePoint = (Point3d.meters ex ey 1.0 )
+                                   , eyePoint = (Point3d.meters ex ey 1.5 )
                                    , upDirection = Direction3d.positiveZ
                                    }
                              , verticalFieldOfView = Angle.degrees 90
@@ -686,17 +751,61 @@ view model =
                      ,y=Tuple.second event.pointer.offsetPos}
              in
                  (
-                 (if (not model.started) && model.host then
-                      [startButton]
-                  else
-                      []
-                 )
+                  (if (not model.started) && model.host then
+                       [startButton]
+                   else
+                       []
+                  )
+                      ++
+                      [div [Html.Attributes.id "doro"
+                           ,style "position" "absolute"
+                           ,style "top" "100px"
+                           ,style "left" "0px"]
+                           [text "どろ"
+                           ,ul [] (
+                                   (List.map
+                                        (\player -> li []
+                                             [text player.name]
+                                        )
+                                        (List.filter (\player -> not player.oni)
+                                             model.others
+                                        )
+                                   )++(if model.me.oni then
+                                           []
+                                       else
+                                           [li [][text model.me.name]]
+                                      )
+                                  )
+                           ]
+                      ]
+                      ++
+                      [div [Html.Attributes.id "doro"
+                           ,style "position" "absolute"
+                           ,style "top" "100px"
+                           ,style "right" "100px"]
+                           [text "けー"
+                           ,ul [](
+                                  (List.map
+                                       (\player -> li []
+                                            [text player.name]
+                                       )
+                                       (List.filter (\player -> player.oni)
+                                            model.others
+                                       )
+                                  )++(if model.me.oni then
+                                          [li [][text model.me.name]]
+                                      else
+                                          []
+                                     )
+                                 )
+                           ]
+                      ]
                  ++[Scene3d.sunny
                         { camera = camera
                         , clipDepth = Length.centimeters 0.5
                         , dimensions = ( Pixels.int 1200, Pixels.int 1000 )
                         , background = Scene3d.transparentBackground
-                        , entities = [plane]++[robot]++walls++jail++goalView++(List.map playerView model.others)
+                        , entities = [plane]++[robot]++walls++grate++goalView++jailView++(List.map playerView model.others)
                         , shadows = True
                         , upDirection = Direction3d.z
                         , sunlightDirection = Direction3d.xz (Angle.degrees -60)
@@ -752,9 +861,9 @@ goalView =
 playerView: Player -> Scene3d.Entity coordinates
 playerView player =
     if player.oni then
-        thiefView player
-    else
         copView player
+    else
+        thiefView player
             
 copView: Player -> Scene3d.Entity coordinates
 copView player =
@@ -935,7 +1044,7 @@ subscriptions model =
         ,gameStarted GameStarted
         ,skywayId IdDefined
         ,handsReceiver Hands
-        --,Browser.Events.onKeyPress keyDecoder
+        ,toGoJail GoToJail
         ,wallInfo WallBuilt
         ,Time.every 5000 (SendWall model.mazeData.dual)
         ,Time.every 1000 Elapsed

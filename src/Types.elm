@@ -41,6 +41,7 @@ type Msg = OthersLoggedIn Player
          | RandomPlayerGenerated Player
          | KeyDown Int
          | Hands (List {x:Float, y:Float, z:Float})
+         | GoToJail (List Player)
          | NextGen MazeDirection
          | WallBuilt (List {x:Int, y:Int, dir:Int})
          | SendWall (List {x:Int, y:Int, dir:Int}) Time.Posix
