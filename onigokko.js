@@ -7358,6 +7358,9 @@ var $author$project$Types$Elapsed = function (a) {
 var $author$project$Types$GameStarted = function (a) {
 	return {$: 'GameStarted', a: a};
 };
+var $author$project$Types$GoToJail = function (a) {
+	return {$: 'GoToJail', a: a};
+};
 var $author$project$Types$Hands = function (a) {
 	return {$: 'Hands', a: a};
 };
@@ -8052,6 +8055,54 @@ var $author$project$Onigokko$skywayId = _Platform_incomingPort(
 				A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string));
 		},
 		A2($elm$json$Json$Decode$field, 'num', $elm$json$Json$Decode$int)));
+var $author$project$Onigokko$toGoJail = _Platform_incomingPort(
+	'toGoJail',
+	$elm$json$Json$Decode$list(
+		A2(
+			$elm$json$Json$Decode$andThen,
+			function (y) {
+				return A2(
+					$elm$json$Json$Decode$andThen,
+					function (x) {
+						return A2(
+							$elm$json$Json$Decode$andThen,
+							function (theta) {
+								return A2(
+									$elm$json$Json$Decode$andThen,
+									function (oni) {
+										return A2(
+											$elm$json$Json$Decode$andThen,
+											function (num) {
+												return A2(
+													$elm$json$Json$Decode$andThen,
+													function (name) {
+														return A2(
+															$elm$json$Json$Decode$andThen,
+															function (id) {
+																return $elm$json$Json$Decode$succeed(
+																	{id: id, name: name, num: num, oni: oni, theta: theta, x: x, y: y});
+															},
+															A2(
+																$elm$json$Json$Decode$field,
+																'id',
+																$elm$json$Json$Decode$oneOf(
+																	_List_fromArray(
+																		[
+																			$elm$json$Json$Decode$null($elm$core$Maybe$Nothing),
+																			A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, $elm$json$Json$Decode$string)
+																		]))));
+													},
+													A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string));
+											},
+											A2($elm$json$Json$Decode$field, 'num', $elm$json$Json$Decode$int));
+									},
+									A2($elm$json$Json$Decode$field, 'oni', $elm$json$Json$Decode$bool));
+							},
+							A2($elm$json$Json$Decode$field, 'theta', $elm$json$Json$Decode$float));
+					},
+					A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$float));
+			},
+			A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$float))));
 var $author$project$Onigokko$wallInfo = _Platform_incomingPort(
 	'wallInfo',
 	$elm$json$Json$Decode$list(
@@ -8081,6 +8132,7 @@ var $author$project$Onigokko$subscriptions = function (model) {
 				$author$project$Onigokko$gameStarted($author$project$Types$GameStarted),
 				$author$project$Onigokko$skywayId($author$project$Types$IdDefined),
 				$author$project$Onigokko$handsReceiver($author$project$Types$Hands),
+				$author$project$Onigokko$toGoJail($author$project$Types$GoToJail),
 				$author$project$Onigokko$wallInfo($author$project$Types$WallBuilt),
 				A2(
 				$elm$time$Time$every,
@@ -8205,6 +8257,75 @@ var $author$project$Onigokko$addToMaze = F2(
 			model,
 			{currentPos: newCurrentPos, lerwStart: newStart, maze: newMaze, outOfTree: newOutOfTree});
 	});
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$core$Maybe$destruct = F3(
+	function (_default, func, maybe) {
+		if (maybe.$ === 'Just') {
+			var a = maybe.a;
+			return func(a);
+		} else {
+			return _default;
+		}
+	});
+var $elm$json$Json$Encode$float = _Json_wrap;
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Onigokko$caught = _Platform_outgoingPort(
+	'caught',
+	$elm$json$Json$Encode$list(
+		function ($) {
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'id',
+						function ($) {
+							return A3($elm$core$Maybe$destruct, $elm$json$Json$Encode$null, $elm$json$Json$Encode$string, $);
+						}($.id)),
+						_Utils_Tuple2(
+						'name',
+						$elm$json$Json$Encode$string($.name)),
+						_Utils_Tuple2(
+						'num',
+						$elm$json$Json$Encode$int($.num)),
+						_Utils_Tuple2(
+						'oni',
+						$elm$json$Json$Encode$bool($.oni)),
+						_Utils_Tuple2(
+						'theta',
+						$elm$json$Json$Encode$float($.theta)),
+						_Utils_Tuple2(
+						'x',
+						$elm$json$Json$Encode$float($.x)),
+						_Utils_Tuple2(
+						'y',
+						$elm$json$Json$Encode$float($.y))
+					]));
+		}));
 var $author$project$Types$East = {$: 'East'};
 var $author$project$Types$North = {$: 'North'};
 var $author$project$Types$South = {$: 'South'};
@@ -8381,17 +8502,57 @@ var $author$project$Onigokko$dual = function (primal) {
 			},
 			A2($elm$core$List$range, -$author$project$Onigokko$mazeSize, $author$project$Onigokko$mazeSize + 1)));
 	var initialEdges = A3(
-		$elm$core$List$foldl,
-		F2(
-			function (v, dict) {
-				return A3(
+		$elm$core$Dict$insert,
+		_Utils_Tuple2($author$project$Onigokko$mazeSize + 3, 2),
+		_List_fromArray(
+			[$author$project$Types$North]),
+		A3(
+			$elm$core$Dict$insert,
+			_Utils_Tuple2($author$project$Onigokko$mazeSize + 3, 3),
+			_List_fromArray(
+				[$author$project$Types$North]),
+			A3(
+				$elm$core$Dict$insert,
+				_Utils_Tuple2($author$project$Onigokko$mazeSize + 3, 4),
+				_List_fromArray(
+					[$author$project$Types$East]),
+				A3(
 					$elm$core$Dict$insert,
-					v,
-					edges(v),
-					dict);
-			}),
-		$elm$core$Dict$empty,
-		dualV);
+					_Utils_Tuple2($author$project$Onigokko$mazeSize + 4, 4),
+					_List_fromArray(
+						[$author$project$Types$East]),
+					A3(
+						$elm$core$Dict$insert,
+						_Utils_Tuple2($author$project$Onigokko$mazeSize + 5, 4),
+						_List_fromArray(
+							[$author$project$Types$South]),
+						A3(
+							$elm$core$Dict$insert,
+							_Utils_Tuple2($author$project$Onigokko$mazeSize + 5, 3),
+							_List_fromArray(
+								[$author$project$Types$South]),
+							A3(
+								$elm$core$Dict$insert,
+								_Utils_Tuple2($author$project$Onigokko$mazeSize + 5, 2),
+								_List_fromArray(
+									[$author$project$Types$West]),
+								A3(
+									$elm$core$Dict$insert,
+									_Utils_Tuple2($author$project$Onigokko$mazeSize + 4, 2),
+									_List_fromArray(
+										[$author$project$Types$West]),
+									A3(
+										$elm$core$List$foldl,
+										F2(
+											function (v, dict) {
+												return A3(
+													$elm$core$Dict$insert,
+													v,
+													edges(v),
+													dict);
+											}),
+										$elm$core$Dict$empty,
+										dualV)))))))));
 	return A3(
 		$elm$core$Dict$foldl,
 		F3(
@@ -8431,8 +8592,8 @@ var $author$project$Onigokko$dual = function (primal) {
 				}),
 			A3(
 				remove,
-				_Utils_Tuple2(0, $author$project$Onigokko$mazeSize + 1),
-				_Utils_Tuple2(1, $author$project$Onigokko$mazeSize + 1),
+				_Utils_Tuple2($author$project$Onigokko$mazeSize, 0),
+				_Utils_Tuple2($author$project$Onigokko$mazeSize + 1, 0),
 				initialEdges),
 			primal));
 };
@@ -8822,35 +8983,18 @@ var $author$project$HandsSigns$handsForward = function (handsData) {
 		$elm$core$Basics$abs(meanAngle1 - meanAngle2),
 		$elm$core$Basics$pi / 4) < 0)) ? $elm$core$Maybe$Just($author$project$Types$Forward) : $elm$core$Maybe$Nothing);
 };
-var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $author$project$Onigokko$initPosition = function (player) {
+	return _Utils_update(
+		player,
+		{
+			theta: 0,
+			x: (((-$author$project$Onigokko$mazeSize) * 3) + 4.5) - (3 * A2($elm$core$Basics$modBy, 2, player.num)),
+			y: player.oni ? ((((-$author$project$Onigokko$mazeSize) * 3) + (3 * (((player.num - 1) / 2) | 0))) + 1.5) : (-((((-$author$project$Onigokko$mazeSize) * 3) + (3 * (((player.num - 1) / 2) | 0))) + 1.5))
+		});
+};
 var $author$project$Onigokko$join = _Platform_outgoingPort('join', $elm$json$Json$Encode$string);
 var $elm$core$Debug$log = _Debug_log;
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$core$Maybe$destruct = F3(
-	function (_default, func, maybe) {
-		if (maybe.$ === 'Just') {
-			var a = maybe.a;
-			return func(a);
-		} else {
-			return _default;
-		}
-	});
-var $elm$json$Json$Encode$float = _Json_wrap;
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $elm$json$Json$Encode$null = _Json_encodeNull;
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
 var $author$project$Onigokko$loggedIn = _Platform_outgoingPort(
 	'loggedIn',
 	function ($) {
@@ -8882,7 +9026,6 @@ var $author$project$Onigokko$loggedIn = _Platform_outgoingPort(
 					$elm$json$Json$Encode$float($.y))
 				]));
 	});
-var $elm$core$Basics$modBy = _Basics_modBy;
 var $elm$core$Basics$cos = _Basics_cos;
 var $elm$core$Basics$sin = _Basics_sin;
 var $author$project$Onigokko$moveBackward = function (p) {
@@ -8908,6 +9051,17 @@ var $author$project$Onigokko$moveForward = function (model) {
 		},
 		A2($elm$core$List$range, -$author$project$Onigokko$mazeSize, $author$project$Onigokko$mazeSize));
 	var walls = (model.started && (model.timeLeft > 0)) ? _Utils_ap(model.mazeData.dual, extraWalls) : model.mazeData.dual;
+	var dist = F2(
+		function (player1, player2) {
+			return $elm$core$Basics$sqrt(
+				A2($elm$core$Basics$pow, player1.x - player2.x, 2) + A2($elm$core$Basics$pow, player1.y - player2.y, 2));
+		});
+	var newlyCaught = (model.me.oni && model.started) ? A2(
+		$elm$core$List$filter,
+		function (player) {
+			return (!player.oni) && (A2(dist, model.me, player) < 1);
+		},
+		model.others) : _List_Nil;
 	var d = wallWidth + playerRadius;
 	var cy = A2(
 		$elm$core$Debug$log,
@@ -8969,9 +9123,12 @@ var $author$project$Onigokko$moveForward = function (model) {
 			$elm$core$List$member,
 			{dir: 2, x: cx + 1, y: cy},
 			walls));
-	return _Utils_update(
-		p,
-		{x: newX, y: newY});
+	return {
+		caught: newlyCaught,
+		newMe: _Utils_update(
+			p,
+			{x: newX, y: newY})
+	};
 };
 var $author$project$Onigokko$moved = _Platform_outgoingPort(
 	'moved',
@@ -9078,7 +9235,6 @@ var $author$project$Onigokko$nextDir = F2(
 				$elm$core$List$head(dirs)),
 			A2($elm$core$List$drop, 1, dirs));
 	});
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Onigokko$startGame = _Platform_outgoingPort('startGame', $elm$json$Json$Encode$bool);
 var $author$project$Onigokko$turnLeft = function (p) {
@@ -9091,15 +9247,6 @@ var $author$project$Onigokko$turnRight = function (p) {
 		p,
 		{theta: p.theta - ((3 * $elm$core$Basics$pi) / 180)});
 };
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
 var $author$project$Onigokko$wallsCompleted = _Platform_outgoingPort(
 	'wallsCompleted',
 	function ($) {
@@ -9202,10 +9349,7 @@ var $author$project$Onigokko$update = F2(
 							{
 								id: $elm$core$Maybe$Just(id),
 								num: num,
-								oni: A2($elm$core$Basics$modBy, 2, num) !== 1,
-								theta: 0,
-								x: (((-$author$project$Onigokko$mazeSize) * 3) + (3 * ((num / 2) | 0))) + 1.5,
-								y: (((-$author$project$Onigokko$mazeSize) * 3) + 1.5) + (3 * A2($elm$core$Basics$modBy, 2, num))
+								oni: A2($elm$core$Basics$modBy, 2, num) === 1
 							});
 					});
 				return _Utils_Tuple2(
@@ -9213,7 +9357,8 @@ var $author$project$Onigokko$update = F2(
 						model,
 						{
 							host: A2($elm$core$Debug$log, 'host?', info.num === 1),
-							me: A3(setId, model.me, info.id, info.num)
+							me: $author$project$Onigokko$initPosition(
+								A3(setId, model.me, info.id, info.num))
 						}),
 					(info.num === 1) ? A2(
 						$elm$random$Random$generate,
@@ -9223,41 +9368,23 @@ var $author$project$Onigokko$update = F2(
 							_Utils_Tuple2(0, 0),
 							$author$project$Onigokko$mazeSize)) : $author$project$Onigokko$loggedIn(model.me));
 			case 'StartGame':
-				var initPosition = function (player) {
-					return _Utils_update(
-						player,
-						{
-							theta: 0,
-							x: (((-$author$project$Onigokko$mazeSize) * 3) + (3 * ((player.num / 2) | 0))) + 1.5,
-							y: (((-$author$project$Onigokko$mazeSize) * 3) + 1.5) + (3 * A2($elm$core$Basics$modBy, 2, player.num))
-						});
-				};
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							me: initPosition(model.me),
+							me: $author$project$Onigokko$initPosition(model.me),
 							started: true,
 							timeLeft: 30
 						}),
 					$author$project$Onigokko$startGame(true));
 			case 'GameStarted':
 				var str = msg.a;
-				var initPosition = function (player) {
-					return _Utils_update(
-						player,
-						{
-							theta: 0,
-							x: (((-$author$project$Onigokko$mazeSize) * 3) + (3 * ((player.num / 2) | 0))) + 1.5,
-							y: (((-$author$project$Onigokko$mazeSize) * 3) + 1.5) + (3 * A2($elm$core$Basics$modBy, 2, player.num))
-						});
-				};
 				var dummy = A2($elm$core$Debug$log, '', 'Game Started');
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							me: initPosition(model.me),
+							me: $author$project$Onigokko$initPosition(model.me),
 							started: true,
 							timeLeft: 30
 						}),
@@ -9281,12 +9408,18 @@ var $author$project$Onigokko$update = F2(
 								{me: newMe}),
 							$author$project$Onigokko$moved(newMe));
 					case 38:
-						var newMe = $author$project$Onigokko$moveForward(model);
+						var newlyCaught = $author$project$Onigokko$moveForward(model).caught;
+						var newMe = $author$project$Onigokko$moveForward(model).newMe;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{me: newMe}),
-							$author$project$Onigokko$moved(newMe));
+							$elm$core$Platform$Cmd$batch(
+								_List_fromArray(
+									[
+										$author$project$Onigokko$moved(newMe),
+										$author$project$Onigokko$caught(newlyCaught)
+									])));
 					case 40:
 						var newMe = $author$project$Onigokko$moveBackward(model.me);
 						return _Utils_Tuple2(
@@ -9313,6 +9446,21 @@ var $author$project$Onigokko$update = F2(
 						model,
 						{others: players}),
 					$elm$core$Platform$Cmd$none);
+			case 'GoToJail':
+				var players = msg.a;
+				if (A2($elm$core$List$member, model.me, players)) {
+					var p = model.me;
+					var newMe = _Utils_update(
+						p,
+						{x: (3 * $author$project$Onigokko$mazeSize) + 10, y: 10});
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{me: newMe}),
+						$author$project$Onigokko$moved(newMe));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 			case 'OthersLoggedIn':
 				var other = msg.a;
 				var players = A2(
@@ -12292,8 +12440,45 @@ var $author$project$Onigokko$goalView = function () {
 	return _List_fromArray(
 		[pole1, pole2, bar]);
 }();
+var $ianmackenzie$elm_3d_scene$Scene3d$cylinderWithShadow = F2(
+	function (givenMaterial, givenCylinder) {
+		return A4($ianmackenzie$elm_3d_scene$Scene3d$Entity$cylinder, true, true, givenMaterial, givenCylinder);
+	});
 var $avh4$elm_color$Color$gray = A4($avh4$elm_color$Color$RgbaSpace, 211 / 255, 215 / 255, 207 / 255, 1.0);
+var $ianmackenzie$elm_3d_scene$Scene3d$Material$metal = function (_v0) {
+	var baseColor = _v0.baseColor;
+	var roughness = _v0.roughness;
+	return $ianmackenzie$elm_3d_scene$Scene3d$Material$pbr(
+		{baseColor: baseColor, metallic: 1, roughness: roughness});
+};
+var $author$project$Onigokko$grateView = function (timeLeft) {
+	var wallHeight = 0.7;
+	var materialGray = $ianmackenzie$elm_3d_scene$Scene3d$Material$metal(
+		{baseColor: $avh4$elm_color$Color$gray, roughness: 0.0});
+	var jailHeight = (2 * timeLeft) / 30;
+	var jailEntity = function (i) {
+		return A2(
+			$ianmackenzie$elm_3d_scene$Scene3d$cylinderWithShadow,
+			materialGray,
+			A2(
+				$ianmackenzie$elm_geometry$Cylinder3d$along,
+				A2(
+					$ianmackenzie$elm_geometry$Axis3d$through,
+					A3($ianmackenzie$elm_geometry$Point3d$meters, -(($author$project$Onigokko$mazeSize - 1) * 3), (-15) + (0.5 * i), 0),
+					$ianmackenzie$elm_geometry$Direction3d$z),
+				{
+					end: $ianmackenzie$elm_units$Length$meters(jailHeight),
+					radius: $ianmackenzie$elm_units$Length$meters(0.1),
+					start: $ianmackenzie$elm_units$Length$meters(0)
+				}));
+	};
+	return (timeLeft <= 0) ? _List_Nil : A2(
+		$elm$core$List$map,
+		jailEntity,
+		A2($elm$core$List$range, 1, 30));
+};
 var $avh4$elm_color$Color$green = A4($avh4$elm_color$Color$RgbaSpace, 115 / 255, 210 / 255, 22 / 255, 1.0);
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $elm$json$Json$Decode$fail = _Json_fail;
 var $author$project$Onigokko$ifIsEnter = function (msg) {
 	return A2(
@@ -12307,42 +12492,56 @@ var $elm$html$Html$input = _VirtualDom_node('input');
 var $ianmackenzie$elm_units$Pixels$int = function (numPixels) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numPixels);
 };
-var $ianmackenzie$elm_3d_scene$Scene3d$cylinderWithShadow = F2(
-	function (givenMaterial, givenCylinder) {
-		return A4($ianmackenzie$elm_3d_scene$Scene3d$Entity$cylinder, true, true, givenMaterial, givenCylinder);
-	});
-var $ianmackenzie$elm_3d_scene$Scene3d$Material$metal = function (_v0) {
-	var baseColor = _v0.baseColor;
-	var roughness = _v0.roughness;
-	return $ianmackenzie$elm_3d_scene$Scene3d$Material$pbr(
-		{baseColor: baseColor, metallic: 1, roughness: roughness});
-};
-var $author$project$Onigokko$jailView = function (timeLeft) {
-	var wallHeight = 0.7;
+var $author$project$Onigokko$jailView = function () {
 	var materialGray = $ianmackenzie$elm_3d_scene$Scene3d$Material$metal(
 		{baseColor: $avh4$elm_color$Color$gray, roughness: 0.0});
-	var jailHeight = A2($elm$core$Debug$log, 'jail height', (2 * timeLeft) / 30);
-	var jailEntity = function (i) {
-		return A2(
-			$ianmackenzie$elm_3d_scene$Scene3d$cylinderWithShadow,
-			materialGray,
-			A2(
-				$ianmackenzie$elm_geometry$Cylinder3d$along,
+	var jailHeight = 3;
+	var pole = F2(
+		function (x, y) {
+			return A2(
+				$ianmackenzie$elm_3d_scene$Scene3d$cylinderWithShadow,
+				materialGray,
 				A2(
-					$ianmackenzie$elm_geometry$Axis3d$through,
-					A3($ianmackenzie$elm_geometry$Point3d$meters, -12, (-15) + (0.5 * i), 0),
-					$ianmackenzie$elm_geometry$Direction3d$z),
-				{
-					end: $ianmackenzie$elm_units$Length$meters(jailHeight),
-					radius: $ianmackenzie$elm_units$Length$meters(0.1),
-					start: $ianmackenzie$elm_units$Length$meters(0)
-				}));
-	};
-	return (timeLeft <= 0) ? _List_Nil : A2(
-		$elm$core$List$map,
-		jailEntity,
-		A2($elm$core$List$range, 1, 30));
-};
+					$ianmackenzie$elm_geometry$Cylinder3d$along,
+					A2(
+						$ianmackenzie$elm_geometry$Axis3d$through,
+						A3($ianmackenzie$elm_geometry$Point3d$meters, (($author$project$Onigokko$mazeSize + 3) * 3) + (0.5 * x), 6 + (0.5 * y), 0),
+						$ianmackenzie$elm_geometry$Direction3d$z),
+					{
+						end: $ianmackenzie$elm_units$Length$meters(jailHeight),
+						radius: $ianmackenzie$elm_units$Length$meters(0.05),
+						start: $ianmackenzie$elm_units$Length$meters(0)
+					}));
+		});
+	return _Utils_ap(
+		A2(
+			$elm$core$List$map,
+			function (y) {
+				return A2(pole, y, 0);
+			},
+			A2($elm$core$List$range, 0, 12)),
+		_Utils_ap(
+			A2(
+				$elm$core$List$map,
+				function (y) {
+					return A2(pole, y, 12);
+				},
+				A2($elm$core$List$range, 0, 12)),
+			_Utils_ap(
+				A2(
+					$elm$core$List$map,
+					function (x) {
+						return A2(pole, 0, x);
+					},
+					A2($elm$core$List$range, 0, 12)),
+				A2(
+					$elm$core$List$map,
+					function (x) {
+						return A2(pole, 12, x);
+					},
+					A2($elm$core$List$range, 0, 12)))));
+}();
+var $elm$html$Html$li = _VirtualDom_node('li');
 var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
 	return {$: 'Viewpoint3d', a: a};
 };
@@ -13385,7 +13584,7 @@ var $author$project$Onigokko$thiefView = function (player) {
 	return robot;
 };
 var $author$project$Onigokko$playerView = function (player) {
-	return player.oni ? $author$project$Onigokko$thiefView(player) : $author$project$Onigokko$copView(player);
+	return player.oni ? $author$project$Onigokko$copView(player) : $author$project$Onigokko$thiefView(player);
 };
 var $ianmackenzie$elm_geometry$BoundingBox3d$hullHelp = F7(
 	function (currentMinX, currentMaxX, currentMinY, currentMaxY, currentMinZ, currentMaxZ, points) {
@@ -13845,7 +14044,6 @@ var $avh4$elm_color$Color$rgba = F4(
 		return A4($avh4$elm_color$Color$RgbaSpace, r, g, b, a);
 	});
 var $author$project$Types$StartGame = {$: 'StartGame'};
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Onigokko$startButton = A2(
@@ -13865,6 +14063,8 @@ var $author$project$Onigokko$startButton = A2(
 					$elm$html$Html$text('start')
 				]))
 		]));
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $ianmackenzie$elm_3d_scene$Scene3d$Light$CastsShadows = function (a) {
 	return {$: 'CastsShadows', a: a};
 };
@@ -13906,8 +14106,6 @@ var $elm_explorations$webgl$WebGL$Internal$Stencil = function (a) {
 	return {$: 'Stencil', a: a};
 };
 var $elm_explorations$webgl$WebGL$stencil = $elm_explorations$webgl$WebGL$Internal$Stencil;
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$core$String$concat = function (strings) {
 	return A2($elm$core$String$join, '', strings);
 };
@@ -15181,6 +15379,7 @@ var $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor = function (color) {
 var $ianmackenzie$elm_3d_scene$Scene3d$transparentBackground = $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor(
 	A4($avh4$elm_color$Color$rgba, 0, 0, 0, 0));
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Onigokko$wallView = function (mazemodel) {
 	var wallWidth = 0.1;
@@ -15382,7 +15581,7 @@ var $author$project$Onigokko$view = function (model) {
 							0.8 * $elm$core$Basics$sin(model.me.theta - ($elm$core$Basics$pi / 10)),
 							1),
 						$ianmackenzie$elm_units$Length$meters(0.22)));
-				var jail = $author$project$Onigokko$jailView(model.timeLeft);
+				var grate = $author$project$Onigokko$grateView(model.timeLeft);
 				var cyl = A2(
 					$ianmackenzie$elm_3d_scene$Scene3d$cylinder,
 					material,
@@ -15404,7 +15603,7 @@ var $author$project$Onigokko$view = function (model) {
 							verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(90),
 							viewpoint: $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
 								{
-									eyePoint: A3($ianmackenzie$elm_geometry$Point3d$meters, ex, ey, 1.0),
+									eyePoint: A3($ianmackenzie$elm_geometry$Point3d$meters, ex, ey, 1.5),
 									focalPoint: A3($ianmackenzie$elm_geometry$Point3d$meters, fx, fy, 1.0),
 									upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
 								})
@@ -15413,35 +15612,130 @@ var $author$project$Onigokko$view = function (model) {
 				return _Utils_ap(
 					((!model.started) && model.host) ? _List_fromArray(
 						[$author$project$Onigokko$startButton]) : _List_Nil,
-					_List_fromArray(
-						[
-							$ianmackenzie$elm_3d_scene$Scene3d$sunny(
-							{
-								background: $ianmackenzie$elm_3d_scene$Scene3d$transparentBackground,
-								camera: camera,
-								clipDepth: $ianmackenzie$elm_units$Length$centimeters(0.5),
-								dimensions: _Utils_Tuple2(
-									$ianmackenzie$elm_units$Pixels$int(1200),
-									$ianmackenzie$elm_units$Pixels$int(1000)),
-								entities: _Utils_ap(
-									_List_fromArray(
-										[plane]),
-									_Utils_ap(
-										_List_fromArray(
-											[robot]),
+					_Utils_ap(
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$id('doro'),
+										A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+										A2($elm$html$Html$Attributes$style, 'top', '100px'),
+										A2($elm$html$Html$Attributes$style, 'left', '0px')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('どろ'),
+										A2(
+										$elm$html$Html$ul,
+										_List_Nil,
 										_Utils_ap(
-											walls,
+											A2(
+												$elm$core$List$map,
+												function (player) {
+													return A2(
+														$elm$html$Html$li,
+														_List_Nil,
+														_List_fromArray(
+															[
+																$elm$html$Html$text(player.name)
+															]));
+												},
+												A2(
+													$elm$core$List$filter,
+													function (player) {
+														return !player.oni;
+													},
+													model.others)),
+											model.me.oni ? _List_Nil : _List_fromArray(
+												[
+													A2(
+													$elm$html$Html$li,
+													_List_Nil,
+													_List_fromArray(
+														[
+															$elm$html$Html$text(model.me.name)
+														]))
+												])))
+									]))
+							]),
+						_Utils_ap(
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$id('doro'),
+											A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+											A2($elm$html$Html$Attributes$style, 'top', '100px'),
+											A2($elm$html$Html$Attributes$style, 'right', '100px')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('けー'),
+											A2(
+											$elm$html$Html$ul,
+											_List_Nil,
 											_Utils_ap(
-												jail,
+												A2(
+													$elm$core$List$map,
+													function (player) {
+														return A2(
+															$elm$html$Html$li,
+															_List_Nil,
+															_List_fromArray(
+																[
+																	$elm$html$Html$text(player.name)
+																]));
+													},
+													A2(
+														$elm$core$List$filter,
+														function (player) {
+															return player.oni;
+														},
+														model.others)),
+												model.me.oni ? _List_fromArray(
+													[
+														A2(
+														$elm$html$Html$li,
+														_List_Nil,
+														_List_fromArray(
+															[
+																$elm$html$Html$text(model.me.name)
+															]))
+													]) : _List_Nil))
+										]))
+								]),
+							_List_fromArray(
+								[
+									$ianmackenzie$elm_3d_scene$Scene3d$sunny(
+									{
+										background: $ianmackenzie$elm_3d_scene$Scene3d$transparentBackground,
+										camera: camera,
+										clipDepth: $ianmackenzie$elm_units$Length$centimeters(0.5),
+										dimensions: _Utils_Tuple2(
+											$ianmackenzie$elm_units$Pixels$int(1200),
+											$ianmackenzie$elm_units$Pixels$int(1000)),
+										entities: _Utils_ap(
+											_List_fromArray(
+												[plane]),
+											_Utils_ap(
+												walls,
 												_Utils_ap(
-													$author$project$Onigokko$goalView,
-													A2($elm$core$List$map, $author$project$Onigokko$playerView, model.others)))))),
-								shadows: true,
-								sunlightDirection: $ianmackenzie$elm_geometry$Direction3d$xz(
-									$ianmackenzie$elm_units$Angle$degrees(-60)),
-								upDirection: $ianmackenzie$elm_geometry$Direction3d$z
-							})
-						]));
+													grate,
+													_Utils_ap(
+														$author$project$Onigokko$goalView,
+														_Utils_ap(
+															$author$project$Onigokko$jailView,
+															A2($elm$core$List$map, $author$project$Onigokko$playerView, model.others)))))),
+										shadows: true,
+										sunlightDirection: $ianmackenzie$elm_geometry$Direction3d$xz(
+											$ianmackenzie$elm_units$Angle$degrees(-60)),
+										upDirection: $ianmackenzie$elm_geometry$Direction3d$z
+									})
+								]))));
 			}
 		}());
 };
