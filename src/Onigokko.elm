@@ -61,7 +61,7 @@ port toGoJail : (List Player -> msg) -> Sub msg
 mazeSize = 5
 init: () -> (Model, Cmd Msg)
 init _ =
-    ({me = {id=Nothing, num=0, name="",x=5,y=5,theta=0,oni=False,caught=False}
+    ({me = {id=Nothing, num=0, name="",x=5,y=5,theta=0,oni=False,caught=False, points=0}
      ,room = ""
      ,name = ""
      ,host = False
@@ -96,6 +96,7 @@ randomPlayer =
              ,name=""
              ,num=0
              ,caught=False
+             ,points=0
              }
         )
         (Random.float -10 10) 
@@ -527,7 +528,11 @@ moveForward model =
                  else
                      []
     in
-        {newMe = {p| x = newX, y = newY}, caught=newlyCaught}
+        {newMe = {p| x = newX
+                 , y = newY
+                 , points = p.points + (List.length newlyCaught)
+                 }
+        , caught=newlyCaught}
 
 moveBackward: Player -> Player
 moveBackward p =
@@ -743,7 +748,7 @@ view model =
                           )
                           (Length.meters 0.22)
 
-                 robot = thiefView (Player (Just "") 0 "test" 1.5 1.5 0 False False)
+                 robot = thiefView (Player (Just "") 0 "test" 1.5 1.5 0 False False 0)
                  walls = wallView model.mazeData
                  grate = grateView model.timeLeft
 
@@ -833,13 +838,21 @@ view model =
                            ,ul [](
                                   (List.map
                                        (\player -> li []
-                                            [text player.name]
+                                            [text (player.name
+                                                       ++
+                                                       (String.repeat player.points "🟡")
+                                                  )
+                                                  ]
                                        )
                                        (List.filter (\player -> player.oni)
                                             model.others
                                        )
                                   )++(if model.me.oni then
-                                          [li [][text model.me.name]]
+                                          [li [][text (model.me.name
+                                                           ++
+                                                           (String.repeat model.me.points "🟡")
+                                                      )
+                                                      ]]
                                       else
                                           []
                                      )
