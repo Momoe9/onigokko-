@@ -61,7 +61,7 @@ port toGoJail : (List Player -> msg) -> Sub msg
 mazeSize = 5
 init: () -> (Model, Cmd Msg)
 init _ =
-    ({me = {id=Nothing, num=0, name="",x=5,y=5,theta=0,oni=False}
+    ({me = {id=Nothing, num=0, name="",x=5,y=5,theta=0,oni=False,caught=False, points=0}
      ,room = ""
      ,name = ""
      ,host = False
@@ -72,8 +72,6 @@ init _ =
                  ,lerwStart = (0,0)
                  ,dual = []
                  }
-     --,vertices = initialVertices
-     --,prev = initialVertices
      ,state = Waiting
      ,angle = 0
      ,start = Nothing
@@ -97,6 +95,8 @@ randomPlayer =
              ,oni=False
              ,name=""
              ,num=0
+             ,caught=False
+             ,points=0
              }
         )
         (Random.float -10 10) 
@@ -211,14 +211,22 @@ update msg model =
                 let
                     p = model.me
                     newMe = {p|x = toFloat (3*mazeSize+10)
-                            ,y= 10
+                            ,y = 10
+                            ,caught = True
                             }
                 in
                     ({model|me=newMe}
                     , moved newMe
                     )
             else
-                (model, Cmd.none)
+                let
+                    newOthers = List.map (\player -> if List.member player players then
+                                                         {player | caught = True}
+                                                     else
+                                                         player
+                                         ) model.others
+                in
+                    ({model | others = newOthers}, Cmd.none)
         OthersLoggedIn other ->
             let
                 players = Debug.log "others logined" <| other::(List.filter (\player -> player.id /= other.id) model.others)
@@ -283,7 +291,17 @@ update msg model =
                                   Task.perform KeyDown <| Task.succeed 38
                               _ -> Cmd.none
                 )
-                    
+
+freed: Player -> Bool
+freed player =
+    let
+        x = Debug.log "x" player.x
+    in
+    (player.x > toFloat(3*(mazeSize+1)))
+        && (not player.caught)
+            && (not player.oni)
+
+                
 --dual: Maze -> Dict (Int, Int) (List MazeDirection)
 dual: Maze -> List {x:Int, y:Int, dir:Int}
 dual primal =
@@ -505,12 +523,17 @@ moveForward model =
             sqrt (((player1.x-player2.x)^2) + ((player1.y-player2.y)^2))
         newlyCaught = if model.me.oni && model.started then
                      List.filter (\player -> (not player.oni)
-                                 && (dist model.me player) < 1
+                                      && (dist model.me player) < 1
+                                      && (not player.caught)
                                  ) model.others
                  else
                      []
     in
-        {newMe = {p| x = newX, y = newY}, caught=newlyCaught}
+        {newMe = {p| x = newX
+                 , y = newY
+                 , points = p.points + (List.length newlyCaught)
+                 }
+        , caught=newlyCaught}
 
 moveBackward: Player -> Player
 moveBackward p =
@@ -726,7 +749,10 @@ view model =
                           )
                           (Length.meters 0.22)
 
-                 robot = thiefView (Player (Just "") 0 "test" 1.5 1.5 0 False)
+                 robot = copView (Player (Just "") 0 "test"
+                                        ((toFloat (-mazeSize*3))+4.5)
+                                        ((toFloat (-mazeSize*3))+1.5)
+                                         (-pi) False False 0)
                  walls = wallView model.mazeData
                  grate = grateView model.timeLeft
 
@@ -765,7 +791,21 @@ view model =
                            ,ul [] (
                                    (List.map
                                         (\player -> li []
-                                             [text player.name]
+                                             [text (player.name
+                                                        ++
+                                                        (if player.caught then
+                                                             "❌"
+                                                         else
+                                                             ""
+                                                        )
+                                                        ++
+                                                        (if (freed player) then
+                                                             "🎉"
+                                                         else
+                                                             ""
+                                                        )
+                                                   )
+                                                   ]
                                         )
                                         (List.filter (\player -> not player.oni)
                                              model.others
@@ -773,7 +813,22 @@ view model =
                                    )++(if model.me.oni then
                                            []
                                        else
-                                           [li [][text model.me.name]]
+                                           [li [][text (model.me.name
+                                                            ++
+                                                            (if model.me.caught then
+                                                                 "❌"
+                                                             else
+                                                                 ""
+                                                            )
+                                                            ++
+                                                            (if (freed model.me) then
+                                                                 "🎉"
+                                                             else
+                                                                 ""
+                                                            )
+                                                       )
+                                                 ]
+                                           ]
                                       )
                                   )
                            ]
@@ -787,16 +842,54 @@ view model =
                            ,ul [](
                                   (List.map
                                        (\player -> li []
-                                            [text player.name]
+                                            [text (player.name
+                                                       ++
+                                                       (String.repeat player.points "🟡")
+                                                  )
+                                                  ]
                                        )
                                        (List.filter (\player -> player.oni)
                                             model.others
                                        )
                                   )++(if model.me.oni then
-                                          [li [][text model.me.name]]
+                                          [li [][text (model.me.name
+                                                           ++
+                                                           (String.repeat model.me.points "🟡")
+                                                      )
+                                                      ]]
                                       else
                                           []
                                      )
+                                 )
+                           ]
+                      ]
+                      ++
+                      [div [Html.Attributes.id "seikou"
+                           ,style "position" "absolute"
+                           ,style "top" "400px"
+                           ,style "right" "400px"
+                           ,style "font-size" "100px"
+                           ,style "color" "red"
+                           ]
+                           [text (if (model.started) && (freed model.me) then
+                                      "脱出成功"
+                                  else
+                                      ""
+                                 )
+                           ]
+                      ]
+                      ++
+                      [div [Html.Attributes.id "shippai"
+                           ,style "position" "absolute"
+                           ,style "top" "400px"
+                           ,style "right" "400px"
+                           ,style "font-size" "100px"
+                           ,style "color" "red"
+                           ]
+                           [text (if model.me.caught then
+                                      "脱出失敗"
+                                  else
+                                      ""
                                  )
                            ]
                       ]

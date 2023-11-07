@@ -13,6 +13,8 @@ type alias Player = {id: Maybe String
                     ,y: Float
                     ,theta: Float
                     ,oni: Bool
+                    ,caught: Bool
+                    ,points: Int
                     }
     
 type alias Model = {me: Player
