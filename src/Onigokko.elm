@@ -523,7 +523,8 @@ moveForward model =
             sqrt (((player1.x-player2.x)^2) + ((player1.y-player2.y)^2))
         newlyCaught = if model.me.oni && model.started then
                      List.filter (\player -> (not player.oni)
-                                 && (dist model.me player) < 1
+                                      && (dist model.me player) < 1
+                                      && (not player.caught)
                                  ) model.others
                  else
                      []
@@ -748,7 +749,10 @@ view model =
                           )
                           (Length.meters 0.22)
 
-                 robot = thiefView (Player (Just "") 0 "test" 1.5 1.5 0 False False 0)
+                 robot = copView (Player (Just "") 0 "test"
+                                        ((toFloat (-mazeSize*3))+4.5)
+                                        ((toFloat (-mazeSize*3))+1.5)
+                                         (-pi) False False 0)
                  walls = wallView model.mazeData
                  grate = grateView model.timeLeft
 
