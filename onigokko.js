@@ -9126,34 +9126,16 @@ var $author$project$Onigokko$moveForward = function (model) {
 		},
 		A2($elm$core$List$range, -$author$project$Onigokko$mazeSize, $author$project$Onigokko$mazeSize));
 	var walls = (model.started && (model.timeLeft > 0)) ? _Utils_ap(model.mazeData.dual, extraWalls) : model.mazeData.dual;
+	var dist2 = F4(
+		function (x1, y1, x2, y2) {
+			return $elm$core$Basics$sqrt(
+				A2($elm$core$Basics$pow, x1 - x2, 2) + A2($elm$core$Basics$pow, y1 - y2, 2));
+		});
 	var dist = F2(
 		function (player1, player2) {
 			return $elm$core$Basics$sqrt(
 				A2($elm$core$Basics$pow, player1.x - player2.x, 2) + A2($elm$core$Basics$pow, player1.y - player2.y, 2));
 		});
-	var newlyCaught = (model.me.oni && model.started) ? A2(
-		$elm$core$List$filter,
-		function (player) {
-			return (!player.oni) && (A2(dist, model.me, player) < 1);
-		},
-		model.others) : _List_Nil;
-	var newPoints = A3(
-		$elm$core$List$foldl,
-		F2(
-			function (player, list) {
-				var _v0 = player.id;
-				if (_v0.$ === 'Just') {
-					var id = _v0.a;
-					return A2($elm$core$List$member, id, list) ? list : _Utils_ap(
-						list,
-						_List_fromArray(
-							[id]));
-				} else {
-					return list;
-				}
-			}),
-		p.points,
-		newlyCaught);
 	var d = wallWidth + playerRadius;
 	var cy = A2(
 		$elm$core$Debug$log,
@@ -9205,6 +9187,29 @@ var $author$project$Onigokko$moveForward = function (model) {
 		$elm$core$Basics$max,
 		p.x + (0.15 * $elm$core$Basics$cos(p.theta)),
 		westBorder);
+	var newlyCaught = (model.me.oni && model.started) ? A2(
+		$elm$core$List$filter,
+		function (player) {
+			return (!player.oni) && (A4(dist2, newX, newY, player.x, player.y) < 1);
+		},
+		model.others) : _List_Nil;
+	var newPoints = A3(
+		$elm$core$List$foldl,
+		F2(
+			function (player, list) {
+				var _v0 = player.id;
+				if (_v0.$ === 'Just') {
+					var id = _v0.a;
+					return A2($elm$core$List$member, id, list) ? list : _Utils_ap(
+						list,
+						_List_fromArray(
+							[id]));
+				} else {
+					return list;
+				}
+			}),
+		p.points,
+		newlyCaught);
 	var bot = A2(
 		$elm$core$Debug$log,
 		'south wall',
