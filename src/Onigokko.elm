@@ -61,7 +61,17 @@ port toGoJail : (List Player -> msg) -> Sub msg
 mazeSize = 5
 init: () -> (Model, Cmd Msg)
 init _ =
-    ({me = {id=Nothing, num=0, name="",x=5,y=5,theta=0,oni=False,caught=False, points=0}
+    ({me = {id=Nothing
+           , num=0
+           , name=""
+           ,x=5
+           ,y=5
+           ,theta=0
+           ,oni=False
+           ,caught=False
+           ,points=[]
+           ,afterCatch=0
+           }
      ,room = ""
      ,name = ""
      ,host = False
@@ -96,7 +106,8 @@ randomPlayer =
              ,name=""
              ,num=0
              ,caught=False
-             ,points=0
+             ,points=[]
+             ,afterCatch=0
              }
         )
         (Random.float -10 10) 
@@ -266,9 +277,13 @@ update msg model =
         Elapsed t ->
             let
                 dummy = Debug.log "ellapsed" t
+                me = model.me
+                newMe = {me|afterCatch = (me.afterCatch - 1)}
             in
                 if model.started then
-                    ({model|timeLeft=(model.timeLeft-1)},
+                    ({model|timeLeft=(model.timeLeft-1)
+                          ,me = newMe
+                     },
                          Cmd.none)
                 else
                     (model, Cmd.none)
@@ -522,16 +537,29 @@ moveForward model =
         dist player1 player2 =
             sqrt (((player1.x-player2.x)^2) + ((player1.y-player2.y)^2))
         newlyCaught = if model.me.oni && model.started then
-                     List.filter (\player -> (not player.oni)
-                                      && (dist model.me player) < 1
-                                      && (not player.caught)
-                                 ) model.others
-                 else
-                     []
+                          List.filter (\player -> (not player.oni)
+                                           && (dist model.me player) < 1
+                                      ) model.others
+                      else
+                          []
+        newPoints = List.foldl (\player list -> case player.id of
+                                                    Just id ->
+                                                        if List.member id list then
+                                                            list
+                                                        else
+                                                            list++[id]
+                                                    Nothing ->
+                                                        list
+                               ) p.points newlyCaught
+        afterCatch = if (List.length newlyCaught) > 0 then
+                         3
+                     else
+                         p.afterCatch
     in
         {newMe = {p| x = newX
                  , y = newY
-                 , points = p.points + (List.length newlyCaught)
+                 , points = p.points 
+                 , afterCatch = afterCatch
                  }
         , caught=newlyCaught}
 
@@ -752,7 +780,9 @@ view model =
                  robot = copView (Player (Just "") 0 "test"
                                         ((toFloat (-mazeSize*3))+4.5)
                                         ((toFloat (-mazeSize*3))+1.5)
-                                         (-pi) False False 0)
+                                         (-pi) False False []
+                                      0
+                                 )
                  walls = wallView model.mazeData
                  grate = grateView model.timeLeft
 
@@ -844,7 +874,7 @@ view model =
                                        (\player -> li []
                                             [text (player.name
                                                        ++
-                                                       (String.repeat player.points "🟡")
+                                                       (String.repeat (List.length player.points) "🟡")
                                                   )
                                                   ]
                                        )
@@ -854,7 +884,7 @@ view model =
                                   )++(if model.me.oni then
                                           [li [][text (model.me.name
                                                            ++
-                                                           (String.repeat model.me.points "🟡")
+                                                           (String.repeat (List.length model.me.points) "🟡")
                                                       )
                                                       ]]
                                       else
@@ -888,6 +918,21 @@ view model =
                            ]
                            [text (if model.me.caught then
                                       "脱出失敗"
+                                  else
+                                      ""
+                                 )
+                           ]
+                      ]
+                      ++
+                      [div [Html.Attributes.id "taiho"
+                           ,style "position" "absolute"
+                           ,style "top" "400px"
+                           ,style "right" "400px"
+                           ,style "font-size" "100px"
+                           ,style "color" "red"
+                           ]
+                           [text (if (model.me.oni) && (model.me.afterCatch > 0) then
+                                      "逮捕"
                                   else
                                       ""
                                  )

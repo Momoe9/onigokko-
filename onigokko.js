@@ -7269,12 +7269,13 @@ var $author$project$Onigokko$randomPlayer = A4(
 	F3(
 		function (x, y, theta) {
 			return {
+				afterCatch: 0,
 				caught: false,
 				id: $elm$core$Maybe$Nothing,
 				name: '',
 				num: 0,
 				oni: false,
-				points: 0,
+				points: _List_Nil,
 				theta: theta,
 				x: $elm$core$Basics$round(x) + 1.5,
 				y: $elm$core$Basics$round(y) + 1.5
@@ -7341,7 +7342,7 @@ var $author$project$Onigokko$init = function (_v0) {
 				maze: $elm$core$Dict$empty,
 				outOfTree: $author$project$Onigokko$vertexList($author$project$Onigokko$mazeSize)
 			},
-			me: {caught: false, id: $elm$core$Maybe$Nothing, name: '', num: 0, oni: false, points: 0, theta: 0, x: 5, y: 5},
+			me: {afterCatch: 0, caught: false, id: $elm$core$Maybe$Nothing, name: '', num: 0, oni: false, points: _List_Nil, theta: 0, x: 5, y: 5},
 			name: '',
 			onHomePosition: false,
 			others: _List_Nil,
@@ -7978,8 +7979,13 @@ var $author$project$Onigokko$othersLogin = _Platform_incomingPort(
 																	return A2(
 																		$elm$json$Json$Decode$andThen,
 																		function (caught) {
-																			return $elm$json$Json$Decode$succeed(
-																				{caught: caught, id: id, name: name, num: num, oni: oni, points: points, theta: theta, x: x, y: y});
+																			return A2(
+																				$elm$json$Json$Decode$andThen,
+																				function (afterCatch) {
+																					return $elm$json$Json$Decode$succeed(
+																						{afterCatch: afterCatch, caught: caught, id: id, name: name, num: num, oni: oni, points: points, theta: theta, x: x, y: y});
+																				},
+																				A2($elm$json$Json$Decode$field, 'afterCatch', $elm$json$Json$Decode$int));
 																		},
 																		A2($elm$json$Json$Decode$field, 'caught', $elm$json$Json$Decode$bool));
 																},
@@ -7999,7 +8005,10 @@ var $author$project$Onigokko$othersLogin = _Platform_incomingPort(
 										},
 										A2($elm$json$Json$Decode$field, 'oni', $elm$json$Json$Decode$bool));
 								},
-								A2($elm$json$Json$Decode$field, 'points', $elm$json$Json$Decode$int));
+								A2(
+									$elm$json$Json$Decode$field,
+									'points',
+									$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
 						},
 						A2($elm$json$Json$Decode$field, 'theta', $elm$json$Json$Decode$float));
 				},
@@ -8035,8 +8044,13 @@ var $author$project$Onigokko$othersMove = _Platform_incomingPort(
 																	return A2(
 																		$elm$json$Json$Decode$andThen,
 																		function (caught) {
-																			return $elm$json$Json$Decode$succeed(
-																				{caught: caught, id: id, name: name, num: num, oni: oni, points: points, theta: theta, x: x, y: y});
+																			return A2(
+																				$elm$json$Json$Decode$andThen,
+																				function (afterCatch) {
+																					return $elm$json$Json$Decode$succeed(
+																						{afterCatch: afterCatch, caught: caught, id: id, name: name, num: num, oni: oni, points: points, theta: theta, x: x, y: y});
+																				},
+																				A2($elm$json$Json$Decode$field, 'afterCatch', $elm$json$Json$Decode$int));
 																		},
 																		A2($elm$json$Json$Decode$field, 'caught', $elm$json$Json$Decode$bool));
 																},
@@ -8056,7 +8070,10 @@ var $author$project$Onigokko$othersMove = _Platform_incomingPort(
 										},
 										A2($elm$json$Json$Decode$field, 'oni', $elm$json$Json$Decode$bool));
 								},
-								A2($elm$json$Json$Decode$field, 'points', $elm$json$Json$Decode$int));
+								A2(
+									$elm$json$Json$Decode$field,
+									'points',
+									$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
 						},
 						A2($elm$json$Json$Decode$field, 'theta', $elm$json$Json$Decode$float));
 				},
@@ -8107,8 +8124,13 @@ var $author$project$Onigokko$toGoJail = _Platform_incomingPort(
 																		return A2(
 																			$elm$json$Json$Decode$andThen,
 																			function (caught) {
-																				return $elm$json$Json$Decode$succeed(
-																					{caught: caught, id: id, name: name, num: num, oni: oni, points: points, theta: theta, x: x, y: y});
+																				return A2(
+																					$elm$json$Json$Decode$andThen,
+																					function (afterCatch) {
+																						return $elm$json$Json$Decode$succeed(
+																							{afterCatch: afterCatch, caught: caught, id: id, name: name, num: num, oni: oni, points: points, theta: theta, x: x, y: y});
+																					},
+																					A2($elm$json$Json$Decode$field, 'afterCatch', $elm$json$Json$Decode$int));
 																			},
 																			A2($elm$json$Json$Decode$field, 'caught', $elm$json$Json$Decode$bool));
 																	},
@@ -8128,7 +8150,10 @@ var $author$project$Onigokko$toGoJail = _Platform_incomingPort(
 											},
 											A2($elm$json$Json$Decode$field, 'oni', $elm$json$Json$Decode$bool));
 									},
-									A2($elm$json$Json$Decode$field, 'points', $elm$json$Json$Decode$int));
+									A2(
+										$elm$json$Json$Decode$field,
+										'points',
+										$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
 							},
 							A2($elm$json$Json$Decode$field, 'theta', $elm$json$Json$Decode$float));
 					},
@@ -8334,6 +8359,9 @@ var $author$project$Onigokko$caught = _Platform_outgoingPort(
 				_List_fromArray(
 					[
 						_Utils_Tuple2(
+						'afterCatch',
+						$elm$json$Json$Encode$int($.afterCatch)),
+						_Utils_Tuple2(
 						'caught',
 						$elm$json$Json$Encode$bool($.caught)),
 						_Utils_Tuple2(
@@ -8352,7 +8380,7 @@ var $author$project$Onigokko$caught = _Platform_outgoingPort(
 						$elm$json$Json$Encode$bool($.oni)),
 						_Utils_Tuple2(
 						'points',
-						$elm$json$Json$Encode$int($.points)),
+						$elm$json$Json$Encode$list($elm$json$Json$Encode$string)($.points)),
 						_Utils_Tuple2(
 						'theta',
 						$elm$json$Json$Encode$float($.theta)),
@@ -9040,6 +9068,9 @@ var $author$project$Onigokko$loggedIn = _Platform_outgoingPort(
 			_List_fromArray(
 				[
 					_Utils_Tuple2(
+					'afterCatch',
+					$elm$json$Json$Encode$int($.afterCatch)),
+					_Utils_Tuple2(
 					'caught',
 					$elm$json$Json$Encode$bool($.caught)),
 					_Utils_Tuple2(
@@ -9058,7 +9089,7 @@ var $author$project$Onigokko$loggedIn = _Platform_outgoingPort(
 					$elm$json$Json$Encode$bool($.oni)),
 					_Utils_Tuple2(
 					'points',
-					$elm$json$Json$Encode$int($.points)),
+					$elm$json$Json$Encode$list($elm$json$Json$Encode$string)($.points)),
 					_Utils_Tuple2(
 					'theta',
 					$elm$json$Json$Encode$float($.theta)),
@@ -9103,9 +9134,26 @@ var $author$project$Onigokko$moveForward = function (model) {
 	var newlyCaught = (model.me.oni && model.started) ? A2(
 		$elm$core$List$filter,
 		function (player) {
-			return (!player.oni) && ((A2(dist, model.me, player) < 1) && (!player.caught));
+			return (!player.oni) && (A2(dist, model.me, player) < 1);
 		},
 		model.others) : _List_Nil;
+	var newPoints = A3(
+		$elm$core$List$foldl,
+		F2(
+			function (player, list) {
+				var _v0 = player.id;
+				if (_v0.$ === 'Just') {
+					var id = _v0.a;
+					return A2($elm$core$List$member, id, list) ? list : _Utils_ap(
+						list,
+						_List_fromArray(
+							[id]));
+				} else {
+					return list;
+				}
+			}),
+		p.points,
+		newlyCaught);
 	var d = wallWidth + playerRadius;
 	var cy = A2(
 		$elm$core$Debug$log,
@@ -9167,15 +9215,12 @@ var $author$project$Onigokko$moveForward = function (model) {
 			$elm$core$List$member,
 			{dir: 2, x: cx + 1, y: cy},
 			walls));
+	var afterCatch = ($elm$core$List$length(newlyCaught) > 0) ? 3 : p.afterCatch;
 	return {
 		caught: newlyCaught,
 		newMe: _Utils_update(
 			p,
-			{
-				points: p.points + $elm$core$List$length(newlyCaught),
-				x: newX,
-				y: newY
-			})
+			{afterCatch: afterCatch, points: p.points, x: newX, y: newY})
 	};
 };
 var $author$project$Onigokko$moved = _Platform_outgoingPort(
@@ -9184,6 +9229,9 @@ var $author$project$Onigokko$moved = _Platform_outgoingPort(
 		return $elm$json$Json$Encode$object(
 			_List_fromArray(
 				[
+					_Utils_Tuple2(
+					'afterCatch',
+					$elm$json$Json$Encode$int($.afterCatch)),
 					_Utils_Tuple2(
 					'caught',
 					$elm$json$Json$Encode$bool($.caught)),
@@ -9203,7 +9251,7 @@ var $author$project$Onigokko$moved = _Platform_outgoingPort(
 					$elm$json$Json$Encode$bool($.oni)),
 					_Utils_Tuple2(
 					'points',
-					$elm$json$Json$Encode$int($.points)),
+					$elm$json$Json$Encode$list($elm$json$Json$Encode$string)($.points)),
 					_Utils_Tuple2(
 					'theta',
 					$elm$json$Json$Encode$float($.theta)),
@@ -9314,6 +9362,9 @@ var $author$project$Onigokko$wallsCompleted = _Platform_outgoingPort(
 							_List_fromArray(
 								[
 									_Utils_Tuple2(
+									'afterCatch',
+									$elm$json$Json$Encode$int($.afterCatch)),
+									_Utils_Tuple2(
 									'caught',
 									$elm$json$Json$Encode$bool($.caught)),
 									_Utils_Tuple2(
@@ -9332,7 +9383,7 @@ var $author$project$Onigokko$wallsCompleted = _Platform_outgoingPort(
 									$elm$json$Json$Encode$bool($.oni)),
 									_Utils_Tuple2(
 									'points',
-									$elm$json$Json$Encode$int($.points)),
+									$elm$json$Json$Encode$list($elm$json$Json$Encode$string)($.points)),
 									_Utils_Tuple2(
 									'theta',
 									$elm$json$Json$Encode$float($.theta)),
@@ -9595,11 +9646,15 @@ var $author$project$Onigokko$update = F2(
 						{host: model.me, walls: model.mazeData.dual}));
 			case 'Elapsed':
 				var t = msg.a;
+				var me = model.me;
+				var newMe = _Utils_update(
+					me,
+					{afterCatch: me.afterCatch - 1});
 				var dummy = A2($elm$core$Debug$log, 'ellapsed', t);
 				return model.started ? _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{timeLeft: model.timeLeft - 1}),
+						{me: newMe, timeLeft: model.timeLeft - 1}),
 					$elm$core$Platform$Cmd$none) : _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'Hands':
 				var handsData = msg.a;
@@ -9660,10 +9715,27 @@ var $author$project$Types$Join = {$: 'Join'};
 var $author$project$Types$NameChanged = function (a) {
 	return {$: 'NameChanged', a: a};
 };
-var $author$project$Types$Player = F9(
-	function (id, num, name, x, y, theta, oni, caught, points) {
-		return {caught: caught, id: id, name: name, num: num, oni: oni, points: points, theta: theta, x: x, y: y};
-	});
+var $author$project$Types$Player = function (id) {
+	return function (num) {
+		return function (name) {
+			return function (x) {
+				return function (y) {
+					return function (theta) {
+						return function (oni) {
+							return function (caught) {
+								return function (points) {
+									return function (afterCatch) {
+										return {afterCatch: afterCatch, caught: caught, id: id, name: name, num: num, oni: oni, points: points, theta: theta, x: x, y: y};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var $author$project$Types$RoomChanged = function (a) {
 	return {$: 'RoomChanged', a: a};
 };
@@ -15589,17 +15661,8 @@ var $author$project$Onigokko$view = function (model) {
 				var id = _v0.a;
 				var walls = $author$project$Onigokko$wallView(model.mazeData);
 				var robot = $author$project$Onigokko$copView(
-					A9(
-						$author$project$Types$Player,
-						$elm$core$Maybe$Just(''),
-						0,
-						'test',
-						((-$author$project$Onigokko$mazeSize) * 3) + 4.5,
-						((-$author$project$Onigokko$mazeSize) * 3) + 1.5,
-						-$elm$core$Basics$pi,
-						false,
-						false,
-						0));
+					$author$project$Types$Player(
+						$elm$core$Maybe$Just(''))(0)('test')(((-$author$project$Onigokko$mazeSize) * 3) + 4.5)(((-$author$project$Onigokko$mazeSize) * 3) + 1.5)(-$elm$core$Basics$pi)(false)(false)(_List_Nil)(0));
 				var relativePos = function (event) {
 					return {x: event.pointer.offsetPos.a, y: event.pointer.offsetPos.b};
 				};
@@ -15790,7 +15853,10 @@ var $author$project$Onigokko$view = function (model) {
 																	$elm$html$Html$text(
 																	_Utils_ap(
 																		player.name,
-																		A2($elm$core$String$repeat, player.points, '🟡')))
+																		A2(
+																			$elm$core$String$repeat,
+																			$elm$core$List$length(player.points),
+																			'🟡')))
 																]));
 													},
 													A2(
@@ -15809,7 +15875,10 @@ var $author$project$Onigokko$view = function (model) {
 																$elm$html$Html$text(
 																_Utils_ap(
 																	model.me.name,
-																	A2($elm$core$String$repeat, model.me.points, '🟡')))
+																	A2(
+																		$elm$core$String$repeat,
+																		$elm$core$List$length(model.me.points),
+																		'🟡')))
 															]))
 													]) : _List_Nil))
 										]))
@@ -15854,34 +15923,54 @@ var $author$project$Onigokko$view = function (model) {
 													model.me.caught ? '脱出失敗' : '')
 												]))
 										]),
-									_List_fromArray(
-										[
-											$ianmackenzie$elm_3d_scene$Scene3d$sunny(
-											{
-												background: $ianmackenzie$elm_3d_scene$Scene3d$transparentBackground,
-												camera: camera,
-												clipDepth: $ianmackenzie$elm_units$Length$centimeters(0.5),
-												dimensions: _Utils_Tuple2(
-													$ianmackenzie$elm_units$Pixels$int(1200),
-													$ianmackenzie$elm_units$Pixels$int(1000)),
-												entities: _Utils_ap(
-													_List_fromArray(
-														[plane]),
-													_Utils_ap(
-														walls,
+									_Utils_ap(
+										_List_fromArray(
+											[
+												A2(
+												$elm$html$Html$div,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$id('taiho'),
+														A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+														A2($elm$html$Html$Attributes$style, 'top', '400px'),
+														A2($elm$html$Html$Attributes$style, 'right', '400px'),
+														A2($elm$html$Html$Attributes$style, 'font-size', '100px'),
+														A2($elm$html$Html$Attributes$style, 'color', 'red')
+													]),
+												_List_fromArray(
+													[
+														$elm$html$Html$text(
+														(model.me.oni && (model.me.afterCatch > 0)) ? '逮捕' : '')
+													]))
+											]),
+										_List_fromArray(
+											[
+												$ianmackenzie$elm_3d_scene$Scene3d$sunny(
+												{
+													background: $ianmackenzie$elm_3d_scene$Scene3d$transparentBackground,
+													camera: camera,
+													clipDepth: $ianmackenzie$elm_units$Length$centimeters(0.5),
+													dimensions: _Utils_Tuple2(
+														$ianmackenzie$elm_units$Pixels$int(1200),
+														$ianmackenzie$elm_units$Pixels$int(1000)),
+													entities: _Utils_ap(
+														_List_fromArray(
+															[plane]),
 														_Utils_ap(
-															grate,
+															walls,
 															_Utils_ap(
-																$author$project$Onigokko$goalView,
+																grate,
 																_Utils_ap(
-																	$author$project$Onigokko$jailView,
-																	A2($elm$core$List$map, $author$project$Onigokko$playerView, model.others)))))),
-												shadows: true,
-												sunlightDirection: $ianmackenzie$elm_geometry$Direction3d$xz(
-													$ianmackenzie$elm_units$Angle$degrees(-60)),
-												upDirection: $ianmackenzie$elm_geometry$Direction3d$z
-											})
-										]))))));
+																	$author$project$Onigokko$goalView,
+																	_Utils_ap(
+																		$author$project$Onigokko$jailView,
+																		A2($elm$core$List$map, $author$project$Onigokko$playerView, model.others)))))),
+													shadows: true,
+													sunlightDirection: $ianmackenzie$elm_geometry$Direction3d$xz(
+														$ianmackenzie$elm_units$Angle$degrees(-60)),
+													upDirection: $ianmackenzie$elm_geometry$Direction3d$z
+												})
+											])))))));
 			}
 		}());
 };

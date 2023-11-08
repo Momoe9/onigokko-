@@ -14,7 +14,8 @@ type alias Player = {id: Maybe String
                     ,theta: Float
                     ,oni: Bool
                     ,caught: Bool
-                    ,points: Int
+                    ,points: List String
+                    ,afterCatch: Int
                     }
     
 type alias Model = {me: Player
