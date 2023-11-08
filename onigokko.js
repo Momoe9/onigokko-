@@ -9137,14 +9137,8 @@ var $author$project$Onigokko$moveForward = function (model) {
 				A2($elm$core$Basics$pow, player1.x - player2.x, 2) + A2($elm$core$Basics$pow, player1.y - player2.y, 2));
 		});
 	var d = wallWidth + playerRadius;
-	var cy = A2(
-		$elm$core$Debug$log,
-		'cy',
-		$elm$core$Basics$floor(p.y / 3));
-	var cx = A2(
-		$elm$core$Debug$log,
-		'cx',
-		$elm$core$Basics$floor(p.x / 3));
+	var cy = $elm$core$Basics$floor(p.y / 3);
+	var cx = $elm$core$Basics$floor(p.x / 3);
 	var eastBorder = (A2(
 		$elm$core$List$member,
 		{dir: 1, x: cx + 1, y: cy},
@@ -9211,18 +9205,15 @@ var $author$project$Onigokko$moveForward = function (model) {
 		p.points,
 		newlyCaught);
 	var bot = A2(
-		$elm$core$Debug$log,
-		'south wall',
-		A2(
-			$elm$core$List$member,
-			{dir: 0, x: cx, y: cy},
-			walls) || A2(
-			$elm$core$List$member,
-			{dir: 2, x: cx + 1, y: cy},
-			walls));
+		$elm$core$List$member,
+		{dir: 0, x: cx, y: cy},
+		walls) || A2(
+		$elm$core$List$member,
+		{dir: 2, x: cx + 1, y: cy},
+		walls);
 	var afterCatch = ($elm$core$List$length(newlyCaught) > 0) ? 3 : p.afterCatch;
 	return {
-		caught: newlyCaught,
+		caught: A2($elm$core$Debug$log, 'newly caught', newlyCaught),
 		newMe: _Utils_update(
 			p,
 			{afterCatch: afterCatch, points: p.points, x: newX, y: newY})
@@ -9533,8 +9524,8 @@ var $author$project$Onigokko$update = F2(
 							$elm$core$Platform$Cmd$batch(
 								_List_fromArray(
 									[
-										$author$project$Onigokko$moved(newMe),
-										$author$project$Onigokko$caught(newlyCaught)
+										$author$project$Onigokko$caught(newlyCaught),
+										$author$project$Onigokko$moved(newMe)
 									])));
 					case 40:
 						var newMe = $author$project$Onigokko$moveBackward(model.me);
@@ -9564,7 +9555,35 @@ var $author$project$Onigokko$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'GoToJail':
 				var players = msg.a;
-				if (A2($elm$core$List$member, model.me, players)) {
+				var myid = A2(
+					$elm$core$Debug$log,
+					'myid',
+					function () {
+						var _v3 = model.me.id;
+						if (_v3.$ === 'Just') {
+							var id = _v3.a;
+							return id;
+						} else {
+							return '';
+						}
+					}());
+				var dummy = A2($elm$core$Debug$log, 'gotojail', players);
+				var caughtIds = A2(
+					$elm$core$Debug$log,
+					'caught ids',
+					A2(
+						$elm$core$List$map,
+						function (player) {
+							var _v2 = player.id;
+							if (_v2.$ === 'Just') {
+								var id = _v2.a;
+								return id;
+							} else {
+								return '';
+							}
+						},
+						players));
+				if (A2($elm$core$List$member, myid, caughtIds)) {
 					var p = model.me;
 					var newMe = _Utils_update(
 						p,
@@ -9655,7 +9674,6 @@ var $author$project$Onigokko$update = F2(
 				var newMe = _Utils_update(
 					me,
 					{afterCatch: me.afterCatch - 1});
-				var dummy = A2($elm$core$Debug$log, 'ellapsed', t);
 				return model.started ? _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -9679,33 +9697,33 @@ var $author$project$Onigokko$update = F2(
 						model,
 						{elapsed: 0, prevHands: model.hands}),
 					function () {
-						var _v2 = $author$project$HandsSigns$handsDirection(model.hands);
-						_v2$2:
+						var _v4 = $author$project$HandsSigns$handsDirection(model.hands);
+						_v4$2:
 						while (true) {
-							if (_v2.$ === 'Just') {
-								switch (_v2.a.$) {
+							if (_v4.$ === 'Just') {
+								switch (_v4.a.$) {
 									case 'Left':
-										var _v3 = _v2.a;
+										var _v5 = _v4.a;
 										return A2(
 											$elm$core$Task$perform,
 											$author$project$Types$KeyDown,
 											$elm$core$Task$succeed(37));
 									case 'Right':
-										var _v4 = _v2.a;
+										var _v6 = _v4.a;
 										return A2(
 											$elm$core$Task$perform,
 											$author$project$Types$KeyDown,
 											$elm$core$Task$succeed(39));
 									default:
-										break _v2$2;
+										break _v4$2;
 								}
 							} else {
-								break _v2$2;
+								break _v4$2;
 							}
 						}
-						var _v5 = $author$project$HandsSigns$handsForward(model.hands);
-						if ((_v5.$ === 'Just') && (_v5.a.$ === 'Forward')) {
-							var _v6 = _v5.a;
+						var _v7 = $author$project$HandsSigns$handsForward(model.hands);
+						if ((_v7.$ === 'Just') && (_v7.a.$ === 'Forward')) {
+							var _v8 = _v7.a;
 							return A2(
 								$elm$core$Task$perform,
 								$author$project$Types$KeyDown,
@@ -13264,7 +13282,7 @@ var $author$project$Onigokko$copView = function (player) {
 };
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $author$project$Onigokko$freed = function (player) {
-	var x = A2($elm$core$Debug$log, 'x', player.x);
+	var x = player.x;
 	return (_Utils_cmp(player.x, 3 * ($author$project$Onigokko$mazeSize + 1)) > 0) && ((!player.caught) && (!player.oni));
 };
 var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
