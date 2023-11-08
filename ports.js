@@ -133,6 +133,7 @@ const token = new SkyWayAuthToken({
 	    return;
 	}
 	const me = await channel.join();
+	console.log(channel.members.length);
 	app.ports.skywayId.send({id:me.id,num:channel.members.length});
 	await me.publish(data);
 

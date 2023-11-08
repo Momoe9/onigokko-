@@ -157,9 +157,6 @@ update msg model =
                 setId player id num = {player|id = Just id
                                       , num = num
                                       , oni = ((modBy 2 num)== 1)
-                                      --, x = (toFloat (-mazeSize*3))+4.5-(toFloat (3*(modBy 2 num)))
-                                      --, y = (toFloat ((-mazeSize*3) + (3*((num-1) // 2))))+1.5
-                                      --,theta = 0
                                       }
             in
                 ({model | me = initPosition <| setId model.me info.id info.num
@@ -536,9 +533,12 @@ moveForward model =
                    Basics.max (p.y + 0.15*(sin p.theta)) southBorder
         dist player1 player2 =
             sqrt (((player1.x-player2.x)^2) + ((player1.y-player2.y)^2))
+        dist2 x1 y1 x2 y2 =
+            sqrt (((x1-x2)^2) + ((y1-y2)^2))
         newlyCaught = if model.me.oni && model.started then
                           List.filter (\player -> (not player.oni)
-                                           && (dist model.me player) < 1
+                                           --&& (dist model.me player) < 1
+                                           && (dist2 newX newY  player.x player.y) < 1
                                       ) model.others
                       else
                           []
