@@ -198,8 +198,8 @@ update msg model =
                             newlyCaught = (moveForward model).caught
                         in
                             ({model| me = newMe}
-                            , Cmd.batch [ moved newMe
-                                        , caught newlyCaught
+                            , Cmd.batch [ caught newlyCaught
+                                        , moved newMe
                                         ]
                             )
                     40 ->
@@ -215,7 +215,22 @@ update msg model =
             in
                 ({model|others=players}, Cmd.none)
         GoToJail players ->
-            if List.member model.me players then
+            let
+                dummy = Debug.log "gotojail" players
+                myid = Debug.log "myid" <|
+                       case model.me.id of
+                           Just id -> id
+                           Nothing -> ""
+                caughtIds = Debug.log "caught ids" <|
+                            List.map
+                                (\player ->
+                                     case player.id of
+                                         Just id -> id
+                                         Nothing -> ""
+                                ) players
+            in
+                --if List.member model.me players then
+            if List.member myid caughtIds then
                 let
                     p = model.me
                     newMe = {p|x = toFloat (3*mazeSize+10)
@@ -273,7 +288,7 @@ update msg model =
                 )
         Elapsed t ->
             let
-                dummy = Debug.log "ellapsed" t
+                --dummy = Debug.log "ellapsed" t
                 me = model.me
                 newMe = {me|afterCatch = (me.afterCatch - 1)}
             in
@@ -307,7 +322,7 @@ update msg model =
 freed: Player -> Bool
 freed player =
     let
-        x = Debug.log "x" player.x
+        x = player.x
     in
     (player.x > toFloat(3*(mazeSize+1)))
         && (not player.caught)
@@ -503,9 +518,9 @@ moveForward model =
                     model.mazeData.dual ++ extraWalls
                 else
                     model.mazeData.dual
-        cx = Debug.log "cx" <| floor (p.x/3)
-        cy = Debug.log "cy" <| floor (p.y/3)
-        bot = Debug.log "south wall" <| ((List.member {x=cx,y=cy,dir=0} walls) || (List.member {x=(cx+1),y=cy,dir=2} walls))
+        cx = floor (p.x/3)
+        cy = floor (p.y/3)
+        bot = ((List.member {x=cx,y=cy,dir=0} walls) || (List.member {x=(cx+1),y=cy,dir=2} walls))
         theta = Debug.log "theta" <| model.me.theta - 2*pi*(toFloat <| floor (model.me.theta/(2*pi)))
         northBorder = if ((List.member {x=cx,y=(cy+1),dir=0} walls) || (List.member {x=(cx+1),y=(cy+1),dir=2} walls)) then
                           (toFloat (3*(cy+1))) - d
@@ -561,7 +576,7 @@ moveForward model =
                  , points = p.points 
                  , afterCatch = afterCatch
                  }
-        , caught=newlyCaught}
+        , caught=Debug.log "newly caught" newlyCaught}
 
 moveBackward: Player -> Player
 moveBackward p =

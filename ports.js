@@ -96,6 +96,7 @@ const token = new SkyWayAuthToken({
 	data.write({class:"move",player:p});
     });
     app.ports.caught.subscribe(function(thiefs) {
+	console.log("caught");
 	data.write({class:"caught",caught:thiefs});
     });
     app.ports.loggedIn.subscribe(function(p) {
@@ -143,7 +144,7 @@ const token = new SkyWayAuthToken({
             const { stream } = await me.subscribe(publication.id);
 
             stream.onData.add((newdata) => {
-		console.log(newdata);
+		//console.log(newdata);
 		if (newdata.class == "move"){
 		    app.ports.othersMove.send(newdata.player);
 		}
@@ -160,7 +161,8 @@ const token = new SkyWayAuthToken({
 		    app.ports.gameStarted.send(Date.now().toString());
 		}
 		else if (newdata.class == "caught"){
-		    console.log("caught");
+		    console.log("caught data");
+		    console.log(newdata.caught);
 		    app.ports.toGoJail.send(newdata.caught);
 		}
             })
